@@ -1,0 +1,50 @@
+/* BossGroupHub - Premium Toast Styles */
+#toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    pointer-events: none;
+    padding: 1rem;
+}
+
+.toast-item {
+    animation: toastSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    pointer-events: auto;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: var(--toast-bg, #10b981);
+    color: white;
+    padding: 1.25rem 1.75rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    min-width: 340px;
+    max-width: 450px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.toast-item:hover {
+    transform: scale(1.02);
+}
+
+.toast-item:active {
+    transform: scale(0.98);
+}
+
+@keyframes toastSlideIn {
+    from { transform: translateX(calc(100% + 2rem)); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toastFadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.9) translateX(20px); }
+}
