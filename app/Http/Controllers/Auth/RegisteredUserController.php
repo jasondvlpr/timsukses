@@ -31,6 +31,12 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request)
     {
+        // Combine country code and whatsapp number
+        if ($request->has('country_code') && $request->has('whatsapp')) {
+            $whatsapp = $request->country_code . ltrim($request->whatsapp, '0');
+            $request->merge(['whatsapp' => $whatsapp]);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],

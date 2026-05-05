@@ -26,9 +26,23 @@
         <!-- WhatsApp Number -->
         <div class="mt-5 space-y-1">
             <x-input-label for="whatsapp" :value="__('Nomor WhatsApp')" class="font-medium text-slate-700" />
-            <x-text-input id="whatsapp" class="block w-full" type="text" name="whatsapp" :value="old('whatsapp')"
-                required placeholder="Contoh: 08123456789" />
-            <p class="text-[10px] text-slate-500 mt-1 italic">* Pastikan nomor WhatsApp dalam keadaan aktif</p>
+            <div class="flex gap-2">
+                <select name="country_code" class="w-[100px] border-gray-300 focus:border-slate-900 focus:ring-slate-900 rounded-lg shadow-sm text-sm transition-all">
+                    <option value="62" {{ old('country_code') == '62' ? 'selected' : '' }}>+62 (ID)</option>
+                    <option value="60" {{ old('country_code') == '60' ? 'selected' : '' }}>+60 (MY)</option>
+                    <option value="65" {{ old('country_code') == '65' ? 'selected' : '' }}>+65 (SG)</option>
+                    <option value="66" {{ old('country_code') == '66' ? 'selected' : '' }}>+66 (TH)</option>
+                    <option value="84" {{ old('country_code') == '84' ? 'selected' : '' }}>+84 (VN)</option>
+                    <option value="63" {{ old('country_code') == '63' ? 'selected' : '' }}>+63 (PH)</option>
+                    <option value="855" {{ old('country_code') == '855' ? 'selected' : '' }}>+855 (KH)</option>
+                    <option value="856" {{ old('country_code') == '856' ? 'selected' : '' }}>+856 (LA)</option>
+                    <option value="95" {{ old('country_code') == '95' ? 'selected' : '' }}>+95 (MM)</option>
+                    <option value="673" {{ old('country_code') == '673' ? 'selected' : '' }}>+673 (BN)</option>
+                </select>
+                <x-text-input id="whatsapp" class="block w-full flex-1" type="text" name="whatsapp" :value="old('whatsapp')"
+                    required placeholder="8123456789" />
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1 italic">* Masukkan nomor tanpa angka 0 di depan (Contoh: 812...)</p>
             <x-input-error :messages="$errors->get('whatsapp')" class="mt-1" />
         </div>
 

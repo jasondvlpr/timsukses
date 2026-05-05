@@ -65,6 +65,7 @@ class AdminDashboardController extends Controller
         $request->validate([
             'message' => 'required|string',
             'status' => 'required|in:open,in_progress,resolved,closed',
+            'send_whatsapp' => 'nullable|string'
         ]);
 
         $ticket->messages()->create([
@@ -75,7 +76,19 @@ class AdminDashboardController extends Controller
 
         $ticket->update(['status' => $request->status]);
 
-        return back()->with('success', 'Balasan berhasil dikirim dan status diperbarui.');
+        // Send WhatsApp if requested
+        if ($request->send_whatsapp === 'yes') {
+            $whatsAppService = new \App\Services\WhatsAppService();
+            // Clean the number from any non-numeric characters except maybe plus
+            $target = preg_replace('/[^0-9]/', '', $ticket->user->whatsapp);
+            
+            if ($target) {
+                $waMessage = "Halo {$ticket->user->name},\n\nAdmin telah membalas tiket Anda [#{$ticket->ticket_number}].\n\nSubjek: {$ticket->subject}\nStatus: " . strtoupper($request->status) . "\n\nBalasan Admin:\n\"{$request->message}\"\n\nSilakan cek dashboard untuk detail selengkapnya.";
+                $whatsAppService->sendMessage($target, $waMessage);
+            }
+        }
+
+        return back()->with('success', 'Balasan berhasil dikirim' . ($request->send_whatsapp === 'yes' ? ' dan dikirim ke WhatsApp.' : '.'));
     }
 
     public function forwardTicket(Request $request, Ticket $ticket)
