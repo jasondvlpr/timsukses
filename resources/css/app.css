@@ -36,6 +36,26 @@
   .form-input {
     @apply border-slate-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm;
   }
+
+  /* Chat Bubbles Visibility Fix */
+  .admin-chat-bubble {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+  }
+  
+  .admin-chat-bubble p, 
+  .admin-chat-bubble span {
+    color: #ffffff !important;
+  }
+
+  .admin-chat-bubble .text-indigo-300,
+  .admin-chat-bubble .text-slate-300 {
+    color: #a5b4fc !important; /* light indigo */
+  }
+
+  .promoter-chat-bubble {
+    @apply bg-slate-100 text-slate-800 border border-slate-200;
+  }
 }
 
 /* Old classes for backwards compatibility during transition */

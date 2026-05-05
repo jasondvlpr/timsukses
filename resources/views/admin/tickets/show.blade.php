@@ -99,10 +99,14 @@
                 <div class="p-8 space-y-6 min-h-[150px]">
                     @foreach($ticket->messages as $message)
                         <div class="flex {{ $message->is_admin_reply ? 'justify-end' : 'justify-start' }}">
-                            <div class="max-w-[85%] p-4 rounded-2xl {{ $message->is_admin_reply ? 'bg-slate-800 text-white shadow-lg rounded-tr-none' : 'bg-slate-100 text-slate-800 border border-slate-200 rounded-tl-none' }}">
-                                <p class="text-xs font-bold mb-1 opacity-75">{{ $message->user->name }}</p>
-                                <p class="text-sm leading-relaxed {{ str_starts_with($message->message, '---') ? 'italic text-indigo-300' : '' }}">{!! nl2br(e($message->message)) !!}</p>
-                                <p class="text-[9px] mt-2 opacity-50">{{ $message->created_at->format('H:i') }}</p>
+                            <div class="max-w-[85%] p-4 rounded-2xl shadow-lg {{ $message->is_admin_reply ? 'rounded-tr-none' : 'bg-slate-100 text-slate-800 border border-slate-200 rounded-tl-none' }}" 
+                                 style="{{ $message->is_admin_reply ? 'background-color: #1e293b !important; color: #ffffff !important;' : '' }}">
+                                <p class="text-xs font-bold mb-1 opacity-75" style="{{ $message->is_admin_reply ? 'color: #ffffff !important;' : '' }}">{{ $message->user->name }}</p>
+                                <p class="text-sm leading-relaxed {{ str_starts_with($message->message, '---') ? 'italic text-indigo-300' : '' }}" 
+                                   style="{{ $message->is_admin_reply && !str_starts_with($message->message, '---') ? 'color: #ffffff !important;' : '' }}">
+                                    {!! nl2br(e($message->message)) !!}
+                                </p>
+                                <p class="text-[9px] mt-2 opacity-50" style="{{ $message->is_admin_reply ? 'color: #ffffff !important; opacity: 0.6;' : '' }}">{{ $message->created_at->format('H:i') }}</p>
                             </div>
                         </div>
                     @endforeach

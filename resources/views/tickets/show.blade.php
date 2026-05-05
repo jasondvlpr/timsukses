@@ -63,15 +63,19 @@
                 <div class="p-8 space-y-6 min-h-[200px]">
                     @forelse($ticket->messages as $message)
                         <div class="flex {{ $message->is_admin_reply ? 'justify-start' : 'justify-end' }}">
-                            <div class="max-w-[85%] p-4 rounded-2xl {{ $message->is_admin_reply ? 'bg-slate-800 text-white shadow-lg rounded-tl-none' : 'bg-blue-50 text-slate-800 border border-blue-100 rounded-tr-none' }}">
+                            <div class="max-w-[85%] p-4 rounded-2xl shadow-lg {{ $message->is_admin_reply ? 'rounded-tl-none' : 'bg-blue-50 text-slate-800 border border-blue-100 rounded-tr-none' }}"
+                                 style="{{ $message->is_admin_reply ? 'background-color: #1e293b !important; color: #ffffff !important;' : '' }}">
                                 <div class="flex items-center gap-2 mb-1">
                                     @if($message->is_admin_reply)
                                         <span class="bg-blue-600 text-[8px] px-1 rounded text-white font-bold uppercase tracking-tighter">Support Team</span>
                                     @endif
-                                    <p class="text-xs font-bold {{ $message->is_admin_reply ? 'text-slate-300' : 'text-slate-600' }}">{{ $message->user->name }}</p>
+                                    <p class="text-xs font-bold {{ $message->is_admin_reply ? 'text-slate-300' : 'text-slate-600' }}"
+                                       style="{{ $message->is_admin_reply ? 'color: #cbd5e1 !important;' : '' }}">{{ $message->user->name }}</p>
                                 </div>
-                                <p class="text-sm leading-relaxed">{!! nl2br(e($message->message)) !!}</p>
-                                <p class="text-[9px] mt-2 opacity-50 flex items-center gap-1">
+                                <p class="text-sm leading-relaxed" style="{{ $message->is_admin_reply ? 'color: #ffffff !important;' : '' }}">
+                                    {!! nl2br(e($message->message)) !!}
+                                </p>
+                                <p class="text-[9px] mt-2 opacity-50 flex items-center gap-1" style="{{ $message->is_admin_reply ? 'color: #ffffff !important; opacity: 0.6;' : '' }}">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     {{ $message->created_at->format('H:i') }}
                                 </p>
