@@ -57,15 +57,15 @@
 
                     @if($ticket->attachment)
                         <div class="mb-6">
-                            <p class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-wider">Lampiran dari Promotor</p>
-                            <a href="{{ Storage::url($ticket->attachment) }}" target="_blank" class="inline-block group relative">
-                                <img src="{{ Storage::url($ticket->attachment) }}" alt="Attachment" class="max-w-md rounded-lg shadow-md border border-slate-200 hover:opacity-90 transition">
-                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20 rounded-lg">
-                                    <span class="bg-white px-3 py-1 rounded-full text-xs font-bold text-slate-900 shadow-lg">Klik untuk Zoom</span>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-widest">Lampiran dari Promotor</p>
+                            <a href="{{ Storage::url($ticket->attachment) }}" target="_blank" class="inline-block group relative overflow-hidden rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
+                                <img src="{{ Storage::url($ticket->attachment) }}" alt="Attachment" class="h-48 w-full object-contain p-1 hover:scale-105 transition-transform duration-500">
+                                <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors flex items-center justify-center">
+                                    <span class="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-[10px] font-black text-slate-900 shadow-xl opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 uppercase tracking-tighter">Klik untuk Zoom</span>
                                 </div>
                             </a>
                         </div>
-                    @endif 
+                    @endif
 
                     @if($ticket->website)
                         <div class="p-3 bg-blue-50 rounded-lg inline-flex items-center gap-2 border border-blue-100">
