@@ -148,26 +148,33 @@
 
     <!-- Modal WhatsApp Confirmation -->
     <div id="wa-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="closeWAModal()"></div>
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-opacity" aria-hidden="true" onclick="closeWAModal()"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-200">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                        </div>
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-lg leading-6 font-bold text-slate-900" id="modal-title">Kirim ke WhatsApp?</h3>
-                            <div class="mt-2">
-                                <p class="text-sm text-slate-500">Apakah Anda ingin mengirimkan balasan ini langsung ke WhatsApp promotor (<strong>{{ $ticket->user->name }}</strong>)?</p>
-                            </div>
-                        </div>
+            <div class="inline-block align-bottom bg-white rounded-3xl text-center overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full border border-slate-100 p-8">
+                <div class="mb-6">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-50 mb-4">
+                        <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
                     </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2" id="modal-title">Kirim ke WhatsApp?</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed px-2">
+                        Apakah Anda ingin mengirimkan balasan ini langsung ke WhatsApp promotor <span class="font-bold text-slate-700">({{ $ticket->user->name }})</span>?
+                    </p>
                 </div>
-                <div class="bg-slate-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
-                    <button type="button" onclick="submitWithWA('yes')" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-lg px-6 py-2.5 bg-green-600 text-sm font-bold text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto transition-all active:scale-95">Ya, Kirim WA</button>
-                    <button type="button" onclick="submitWithWA('no')" class="mt-3 w-full inline-flex justify-center rounded-xl border border-slate-300 shadow-sm px-6 py-2.5 bg-white text-sm font-bold text-slate-700 hover:bg-slate-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto transition-all active:scale-95">Hanya Balas</button>
+                <div class="flex flex-col gap-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" onclick="submitWithWA('yes')" class="inline-flex justify-center items-center rounded-xl px-4 py-3 bg-green-600 text-[13px] font-bold text-white hover:bg-green-700 shadow-md shadow-green-100 transition-all active:scale-95">
+                            Ya, Kirim WA
+                        </button>
+                        <button type="button" onclick="submitWithWA('no')" class="inline-flex justify-center items-center rounded-xl px-4 py-3 bg-white text-[13px] font-bold text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all active:scale-95">
+                            Hanya Balas
+                        </button>
+                    </div>
+                    <button type="button" onclick="closeWAModal()" class="w-full py-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-wider">
+                        Batal
+                    </button>
                 </div>
             </div>
         </div>
