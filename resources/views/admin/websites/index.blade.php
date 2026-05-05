@@ -68,6 +68,16 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-slate-200">
+                <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <h3 class="text-lg font-bold text-slate-800">Daftar Website</h3>
+                    <form action="{{ route('admin.websites') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-4">
+                        <div class="relative">
+                            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari nama, url, atau promotor..." 
+                                   class="px-4 py-2 text-sm border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64 transition-all" />
+                        </div>
+                        <button type="submit" class="hidden sm:block bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition">Cari</button>
+                    </form>
+                </div>
                 <div class="p-0">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-slate-200">
@@ -78,14 +88,15 @@
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">URL</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Pemilik (Promotor)</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tanggal Ditambahkan</th>
+                                    <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 bg-white">
                                 @forelse($websites as $index => $web)
                                     <tr class="hover:bg-slate-50 transition">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {{ $websites->firstItem() + $index }}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-medium">
+                                            {{ $loop->iteration }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-bold text-slate-900">{{ $web->name }}</div>
@@ -110,6 +121,13 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                             {{ $web->created_at->format('d M Y') }}
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($web->is_active)
+                                                <span class="px-2.5 py-1 text-[10px] font-bold bg-green-100 text-green-700 rounded-full uppercase tracking-wider">Aktif</span>
+                                            @else
+                                                <span class="px-2.5 py-1 text-[10px] font-bold bg-red-100 text-red-700 rounded-full uppercase tracking-wider">Nonaktif</span>
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm flex items-center gap-3">
                                             <a href="{{ route('admin.users.edit', $web->user_id) }}" class="text-slate-400 hover:text-indigo-600 transition" title="Lihat Profil Pemilik">
                                                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -128,7 +146,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-12 text-center">
+                                        <td colspan="7" class="px-6 py-12 text-center">
                                             <div class="flex flex-col items-center justify-center text-slate-400">
                                                 <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" class="mb-2 opacity-20"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
                                                 <p class="text-sm font-medium">Belum ada website yang terdaftar.</p>
@@ -140,9 +158,6 @@
                         </table>
                     </div>
                 </div>
-            </div>
-            <div class="mt-4">
-                {{ $websites->links() }}
             </div>
         </div>
     </div>

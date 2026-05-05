@@ -102,13 +102,33 @@ class AdminDashboardController extends Controller
         return back()->with('success', "Keluhan berhasil diteruskan kepada {$newAssignee->name}.");
     }
 
-    public function websiteRequests()
+    public function websiteRequests(Request $request)
     {
+        $status = $request->get('status', 'unapproved');
+        $search = $request->get('search');
+
         $requests = WebsiteRequest::with('user')
-            ->whereIn('status', ['pending', 'processing'])
-            ->latest()
-            ->paginate(10);
-        return view('admin.website_requests.index', compact('requests'));
+            ->when($status === 'unapproved', function($query) {
+                return $query->whereIn('status', ['pending', 'processing']);
+            })
+            ->when($status !== 'unapproved' && $status !== 'all', function($query) use ($status) {
+                return $query->where('status', $status);
+            })
+            ->when($search, function($query) use ($search) {
+                return $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('url', 'like', "%{$search}%")
+                      ->orWhereHas('user', function($userQuery) use ($search) {
+                          $userQuery->where('name', 'like', "%{$search}%")
+                                   ->orWhere('username', 'like', "%{$search}%");
+                      });
+                });
+            })
+            ->oldest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.website_requests.index', compact('requests', 'status', 'search'));
     }
 
     public function processWebsite(WebsiteRequest $websiteRequest)
@@ -155,11 +175,24 @@ class AdminDashboardController extends Controller
         return back()->with('success', 'Pengajuan website ditolak.');
     }
 
-    public function websites()
+    public function websites(Request $request)
     {
-        $websites = Website::with('user')->latest()->paginate(15);
+        $search = $request->get('search');
+        
+        $websites = Website::with('user')
+            ->when($search, function($query) use ($search) {
+                return $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('url', 'like', "%{$search}%")
+                    ->orWhereHas('user', function($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                                 ->orWhere('username', 'like', "%{$search}%");
+                    });
+            })
+            ->oldest()
+            ->get();
+            
         $promoters = User::where('role', 'promoter')->get();
-        return view('admin.websites.index', compact('websites', 'promoters'));
+        return view('admin.websites.index', compact('websites', 'promoters', 'search'));
     }
 
     public function destroyWebsite(Website $website)

@@ -13,7 +13,27 @@
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-slate-200">
+                <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <h3 class="text-lg font-bold text-slate-800">Daftar Pengajuan</h3>
+                    <form action="{{ route('admin.website-requests') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-4">
+                        <div class="relative">
+                            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari nama, url, atau promotor..." 
+                                   class="px-4 py-2 text-sm border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64 transition-all" />
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label for="status" class="text-xs font-bold text-slate-500 uppercase whitespace-nowrap">Status:</label>
+                            <select name="status" id="status" onchange="this.form.submit()" class="text-sm font-bold text-slate-700 border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="unapproved" {{ $status == 'unapproved' ? 'selected' : '' }}>BELUM APPROVE</option>
+                                <option value="all" {{ $status == 'all' ? 'selected' : '' }}>SEMUA STATUS</option>
+                                <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>PENDING</option>
+                                <option value="processing" {{ $status == 'processing' ? 'selected' : '' }}>PROCESSING</option>
+                                <option value="approved" {{ $status == 'approved' ? 'selected' : '' }}>APPROVED</option>
+                                <option value="rejected" {{ $status == 'rejected' ? 'selected' : '' }}>REJECTED</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="hidden sm:block bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition">Cari</button>
+                    </form>
+                </div>
                 <div class="p-0">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-slate-200">
@@ -22,6 +42,7 @@
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">No. Pengajuan</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Promotor</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Detail Website</th>
+                                    <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Dibuat</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-4 bg-slate-50 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
@@ -42,6 +63,10 @@
                                                     "{{ $request->description }}"
                                                 </div>
                                             @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-bold text-slate-700">{{ $request->created_at->format('d M Y') }}</div>
+                                            <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $request->created_at->format('H:i') }} WIB</div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <span class="px-3 py-1 text-xs font-bold rounded-full 
@@ -114,7 +139,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-8 text-center text-slate-500 font-medium">Belum ada pengajuan.</td>
+                                        <td colspan="6" class="px-6 py-8 text-center text-slate-500 font-medium">Belum ada pengajuan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
