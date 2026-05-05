@@ -28,10 +28,29 @@ class AdminDashboardController extends Controller
         return view('admin.promoters.index', compact('promoters'));
     }
 
-    public function tickets()
+    public function tickets(Request $request)
     {
-        $tickets = Ticket::with('user', 'website', 'assignedTo')->latest()->paginate(10);
-        return view('admin.tickets.index', compact('tickets'));
+        $status = $request->get('status', 'open');
+        $search = $request->get('search');
+        
+        $tickets = Ticket::with('user', 'website', 'assignedTo')
+            ->when($status !== 'all', function($query) use ($status) {
+                return $query->where('status', $status);
+            })
+            ->when($search, function($query) use ($search) {
+                return $query->where(function($q) use ($search) {
+                    $q->where('subject', 'like', "%{$search}%")
+                      ->orWhere('ticket_number', 'like', "%{$search}%")
+                      ->orWhereHas('user', function($userQuery) use ($search) {
+                          $userQuery->where('name', 'like', "%{$search}%");
+                      });
+                });
+            })
+            ->oldest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.tickets.index', compact('tickets', 'status', 'search'));
     }
 
     public function showTicket(Ticket $ticket)
