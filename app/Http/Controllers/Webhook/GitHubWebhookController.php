@@ -61,6 +61,10 @@ class GitHubWebhookController extends Controller
             try {
                 Log::info("GitHub Webhook: Starting deployment for branch '{$branch}'");
                 
+                // Fix for 'dubious ownership' error on some servers
+                $repoPath = base_path();
+                exec("git config --global --add safe.directory {$repoPath} 2>&1");
+
                 // Execute git pull
                 $output = [];
                 $exitCode = 0;
