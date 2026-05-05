@@ -65,7 +65,7 @@
                                 </div>
                             </a>
                         </div>
-                    @endif
+                    @endif 
 
                     @if($ticket->website)
                         <div class="p-3 bg-blue-50 rounded-lg inline-flex items-center gap-2 border border-blue-100">
