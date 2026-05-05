@@ -85,7 +85,10 @@ class AdminDashboardController extends Controller
 
     public function websiteRequests()
     {
-        $requests = WebsiteRequest::with('user')->latest()->paginate(10);
+        $requests = WebsiteRequest::with('user')
+            ->whereIn('status', ['pending', 'processing'])
+            ->latest()
+            ->paginate(10);
         return view('admin.website_requests.index', compact('requests'));
     }
 
