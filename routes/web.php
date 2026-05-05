@@ -7,7 +7,10 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\PromoterDashboardController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Webhook\GitHubWebhookController;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/webhooks/github', [GitHubWebhookController::class, 'handle'])->name('webhooks.github');
 
 Route::get('/', function () {
     return view('welcome');
