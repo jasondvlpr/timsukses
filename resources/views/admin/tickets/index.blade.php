@@ -46,8 +46,15 @@
                                     <tr class="hover:bg-slate-50 transition">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-600">{{ $ticket->ticket_number ?? 'TKT-OLD' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-bold text-slate-900">{{ $ticket->user->name }}</div>
-                                            <div class="text-xs text-slate-400">{{ $ticket->website->name ?? 'Umum' }}</div>
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-[10px]">
+                                                    {{ strtoupper(substr($ticket->user->name, 0, 1)) }}
+                                                </div>
+                                                <div>
+                                                    <div class="text-sm font-bold text-slate-900">{{ $ticket->user->name }}</div>
+                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $ticket->website->name ?? 'Umum' }}</div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="text-sm font-medium text-slate-900">{{ $ticket->subject }}</div>

@@ -87,7 +87,7 @@
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Website</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">URL</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Pemilik (Promotor)</th>
-                                    <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tanggal Ditambahkan</th>
+                                    <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Dikirim</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
@@ -95,7 +95,7 @@
                             <tbody class="divide-y divide-slate-100 bg-white">
                                 @forelse($websites as $index => $web)
                                     <tr class="hover:bg-slate-50 transition">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-medium">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-600">
                                             {{ $loop->iteration }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -113,13 +113,14 @@
                                                     {{ substr($web->user->name, 0, 1) }}
                                                 </div>
                                                 <div>
-                                                    <div class="text-sm font-semibold text-slate-900">{{ $web->user->name }}</div>
-                                                    <div class="text-xs text-slate-500">{{ $web->user->username }}</div>
+                                                    <div class="text-sm font-bold text-slate-900">{{ $web->user->name }}</div>
+                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $web->user->username }}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {{ $web->created_at->format('d M Y') }}
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-bold text-slate-700">{{ $web->created_at->format('d M Y') }}</div>
+                                            <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $web->created_at->format('H:i') }} WIB</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @if($web->is_active)

@@ -13,6 +13,7 @@
                 </div>
             @endif
 
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-slate-200">
                 <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <h3 class="text-lg font-bold text-slate-800">Daftar Pengajuan</h3>
                     <form action="{{ route('admin.website-requests') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-4">
@@ -42,7 +43,7 @@
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">No. Pengajuan</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Promotor</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Detail Website</th>
-                                    <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Dibuat</th>
+                                    <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Dikirim</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-4 bg-slate-50 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
@@ -51,9 +52,16 @@
                                 @forelse($requests as $request)
                                     <tr class="hover:bg-slate-50 transition">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-600">{{ $request->ticket_number ?? 'REQ-OLD' }}</td>
-                                        <td class="px-6 py-4">
-                                            <div class="text-sm font-bold text-slate-900">{{ $request->user->name }}</div>
-                                            <div class="text-xs text-slate-500">{{ $request->user->username }}</div>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-[10px]">
+                                                    {{ strtoupper(substr($request->user->name, 0, 1)) }}
+                                                </div>
+                                                <div>
+                                                    <div class="text-sm font-bold text-slate-900">{{ $request->user->name }}</div>
+                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $request->user->username }}</div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="text-sm font-semibold text-slate-900">{{ $request->name }}</div>
