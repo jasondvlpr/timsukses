@@ -114,8 +114,9 @@
                                             
                                             <!-- Approve Form -->
                                             <div id="approve-form-{{ $request->id }}" class="hidden mt-4 text-left p-4 bg-green-50 rounded-lg border border-green-200">
-                                                <form action="{{ route('admin.website-requests.approve', $request) }}" method="POST">
+                                                <form id="approve-form-el-{{ $request->id }}" action="{{ route('admin.website-requests.approve', $request) }}" method="POST">
                                                     @csrf
+                                                    <input type="hidden" name="send_whatsapp" class="wa-input" value="no">
                                                     <div class="mb-3">
                                                         <label class="block text-xs font-bold text-green-800 mb-1">Final URL / Link Website</label>
                                                         <input type="url" name="url" value="{{ $request->url }}" class="w-full text-sm border-green-300 focus:ring-green-500 focus:border-green-500 rounded-md" required>
@@ -126,20 +127,21 @@
                                                     </div>
                                                     <div class="flex justify-end">
                                                         <button type="button" onclick="document.getElementById('approve-form-{{ $request->id }}').classList.add('hidden')" class="mr-2 text-xs text-slate-500 font-medium">Batal</button>
-                                                        <button type="submit" class="btn-primary px-3 py-1 text-xs bg-green-600 hover:bg-green-700 border-none">Simpan & Setujui</button>
+                                                        <button type="button" onclick="confirmWA('approve-form-el-{{ $request->id }}', '{{ $request->user->name }}')" class="btn-primary px-3 py-1 text-xs bg-green-600 hover:bg-green-700 border-none">Simpan & Setujui</button>
                                                     </div>
                                                 </form>
                                             </div>
 
                                             <!-- Reject Form -->
                                             <div id="reject-form-{{ $request->id }}" class="hidden mt-4 text-left p-4 bg-slate-50 rounded-lg border border-slate-200">
-                                                <form action="{{ route('admin.website-requests.reject', $request) }}" method="POST">
+                                                <form id="reject-form-el-{{ $request->id }}" action="{{ route('admin.website-requests.reject', $request) }}" method="POST">
                                                     @csrf
+                                                    <input type="hidden" name="send_whatsapp" class="wa-input" value="no">
                                                     <label class="block text-xs font-bold text-slate-700 mb-1">Alasan Penolakan</label>
                                                     <textarea name="admin_note" class="w-full text-sm border-slate-300 focus:ring-blue-500 focus:border-blue-500 rounded-md mb-3" placeholder="Alasan penolakan..." required></textarea>
                                                     <div class="flex justify-end">
                                                         <button type="button" onclick="document.getElementById('reject-form-{{ $request->id }}').classList.add('hidden')" class="mr-2 text-xs text-slate-500 font-medium">Batal</button>
-                                                        <button type="submit" class="btn-danger text-xs px-3 py-1">Kirim Penolakan</button>
+                                                        <button type="button" onclick="confirmWA('reject-form-el-{{ $request->id }}', '{{ $request->user->name }}')" class="btn-danger text-xs px-3 py-1">Kirim Penolakan</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -160,4 +162,65 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal WhatsApp Confirmation -->
+    <div id="wa-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-opacity" aria-hidden="true" onclick="closeWAModal()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-3xl text-center overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full border border-slate-100 p-8">
+                <div class="mb-6">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-50 mb-4">
+                        <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2" id="modal-title">Kirim ke WhatsApp?</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed px-2">
+                        Apakah Anda ingin mengirimkan notifikasi pengajuan ini langsung ke WhatsApp promotor <span class="font-bold text-slate-700" id="wa-user-name"></span>?
+                    </p>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" onclick="submitWithWA('yes')" class="inline-flex justify-center items-center rounded-xl px-4 py-3 bg-green-600 text-[13px] font-bold text-white hover:bg-green-700 shadow-md shadow-green-100 transition-all active:scale-95">
+                            Ya, Kirim WA
+                        </button>
+                        <button type="button" onclick="submitWithWA('no')" class="inline-flex justify-center items-center rounded-xl px-4 py-3 bg-white text-[13px] font-bold text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all active:scale-95">
+                            Hanya Balas
+                        </button>
+                    </div>
+                    <button type="button" onclick="closeWAModal()" class="w-full py-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-wider">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentForm = null;
+
+        function confirmWA(formId, userName) {
+            const form = document.getElementById(formId);
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            currentForm = form;
+            document.getElementById('wa-user-name').textContent = '(' + userName + ')';
+            document.getElementById('wa-modal').classList.remove('hidden');
+        }
+
+        function closeWAModal() {
+            document.getElementById('wa-modal').classList.add('hidden');
+        }
+
+        function submitWithWA(value) {
+            if (currentForm) {
+                currentForm.querySelector('.wa-input').value = value;
+                closeWAModal();
+                currentForm.submit();
+            }
+        }
+    </script>
 </x-app-layout>

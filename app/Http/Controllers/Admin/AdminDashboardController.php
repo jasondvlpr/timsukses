@@ -158,7 +158,8 @@ class AdminDashboardController extends Controller
 
         $request->validate([
             'url' => 'required|url|max:255',
-            'admin_note' => 'required|string'
+            'admin_note' => 'required|string',
+            'send_whatsapp' => 'nullable|string'
         ]);
 
         $websiteRequest->update([
@@ -173,19 +174,42 @@ class AdminDashboardController extends Controller
             'url' => $websiteRequest->url,
         ]);
 
-        return back()->with('success', 'Website telah disetujui dan ditambahkan ke daftar promotor.');
+        // Send WhatsApp if requested
+        if ($request->send_whatsapp === 'yes') {
+            $whatsAppService = new \App\Services\WhatsAppService();
+            $target = preg_replace('/[^0-9]/', '', $websiteRequest->user->whatsapp);
+            if ($target) {
+                $waMessage = "Halo {$websiteRequest->user->name},\n\nPengajuan website Anda telah DISETUJUI oleh Admin.\n\nNama Web: {$websiteRequest->name}\nLink: {$request->url}\n\nCatatan Admin:\n\"{$request->admin_note}\"\n\nWebsite Anda kini sudah aktif di dashboard.";
+                $whatsAppService->sendMessage($target, $waMessage);
+            }
+        }
+
+        return back()->with('success', 'Website telah disetujui' . ($request->send_whatsapp === 'yes' ? ' dan dikirim ke WhatsApp.' : '.'));
     }
 
     public function rejectWebsite(Request $request, WebsiteRequest $websiteRequest)
     {
-        $request->validate(['admin_note' => 'required|string']);
+        $request->validate([
+            'admin_note' => 'required|string',
+            'send_whatsapp' => 'nullable|string'
+        ]);
 
         $websiteRequest->update([
             'status' => 'rejected',
             'admin_note' => $request->admin_note,
         ]);
 
-        return back()->with('success', 'Pengajuan website ditolak.');
+        // Send WhatsApp if requested
+        if ($request->send_whatsapp === 'yes') {
+            $whatsAppService = new \App\Services\WhatsAppService();
+            $target = preg_replace('/[^0-9]/', '', $websiteRequest->user->whatsapp);
+            if ($target) {
+                $waMessage = "Halo {$websiteRequest->user->name},\n\nMohon maaf, pengajuan website Anda ({$websiteRequest->name}) telah DITOLAK oleh Admin.\n\nAlasan Penolakan:\n\"{$request->admin_note}\"\n\nSilakan cek dashboard untuk informasi lebih lanjut atau hubungi admin jika ada pertanyaan.";
+                $whatsAppService->sendMessage($target, $waMessage);
+            }
+        }
+
+        return back()->with('success', 'Pengajuan website ditolak' . ($request->send_whatsapp === 'yes' ? ' dan dikirim ke WhatsApp.' : '.'));
     }
 
     public function websites(Request $request)
