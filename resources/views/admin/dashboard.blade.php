@@ -85,15 +85,21 @@
                             @endif
                         </p>
                         <div class="mt-8 flex flex-col gap-3">
-                            <a href="{{ route('admin.analytics.chat') }}" class="flex items-center gap-3 px-5 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-2xl transition backdrop-blur-md group">
-                                <div class="w-8 h-8 flex items-center justify-center bg-emerald-500/20 text-emerald-300 rounded-xl group-hover:bg-emerald-500/30 transition">
+                            <a href="{{ route('admin.analytics.chat') }}" 
+                               class="flex items-center gap-3 px-5 py-3 border border-white/10 rounded-2xl transition group"
+                               style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+                                <div class="w-8 h-8 flex items-center justify-center rounded-xl group-hover:bg-white/20 transition"
+                                     style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7;">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                                 </div>
                                 <span class="text-sm font-bold text-white">Chat Analytics</span>
                             </a>
                             
-                            <a href="{{ route('admin.logs.index') }}" class="flex items-center gap-3 px-5 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-2xl transition backdrop-blur-md group">
-                                <div class="w-8 h-8 flex items-center justify-center bg-blue-500/20 text-blue-300 rounded-xl group-hover:bg-blue-500/30 transition">
+                            <a href="{{ route('admin.logs.index') }}" 
+                               class="flex items-center gap-3 px-5 py-3 border border-white/10 rounded-2xl transition group"
+                               style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+                                <div class="w-8 h-8 flex items-center justify-center rounded-xl group-hover:bg-white/20 transition"
+                                     style="background: rgba(59, 130, 246, 0.2); color: #93c5fd;">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 </div>
                                 <span class="text-sm font-bold text-white">Lihat Deployment Logs</span>
