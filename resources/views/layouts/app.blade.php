@@ -40,30 +40,31 @@
     @auth
     <script>
     // ═══════════════════════════════════════════════════════════
-    //  BossGroupHub — Global Chat Notification System
+    //  BossGroupHub — Global Notification System
     // ═══════════════════════════════════════════════════════════
     (function () {
-        const POLL_INTERVAL  = 8000;   // poll every 8s
+        const POLL_INTERVAL  = 8000;
         const UNREAD_URL     = "{{ route('chat.unread') }}";
         const CHAT_URL       = "{{ route('chat.index') }}";
-        const ON_CHAT_PAGE   = window.location.pathname.startsWith('/chat');
+        const NOTIF_URL      = "{{ route('admin.notifications.check') }}";
+        const ADMIN_DASH_URL = "{{ route('admin.dashboard') }}";
+        const IS_BACKOFFICE  = {{ auth()->user()->isAdmin() || auth()->user()->isStaff() ? 'true' : 'false' }};
 
-        let prevTotal        = null;   // null = first load (don't notify)
+        let prevTotal        = null;
+        let prevAdminTotal   = null;
         let audioCtx         = null;
         let notifPermission  = Notification.permission;
 
-        // ── 1. Request notification permission on first poll ─────
         if (notifPermission === 'default') {
             Notification.requestPermission().then(p => { notifPermission = p; });
         }
 
-        // ── 2. Web Audio API beep (no external file needed) ──────
-        function playBeep() {
+        function playBeep(isUrgent = false) {
             try {
                 audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-                // Two-tone "ding" notification sound
                 const now = audioCtx.currentTime;
-                [880, 1100].forEach((freq, i) => {
+                const tones = isUrgent ? [880, 1100, 1320] : [880, 1100];
+                tones.forEach((freq, i) => {
                     const osc  = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.connect(gain);
@@ -72,72 +73,77 @@
                     osc.frequency.setValueAtTime(freq, now + i * 0.12);
                     gain.gain.setValueAtTime(0, now + i * 0.12);
                     gain.gain.linearRampToValueAtTime(0.25, now + i * 0.12 + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.35);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + (isUrgent ? 0.45 : 0.35));
                     osc.start(now + i * 0.12);
-                    osc.stop(now + i * 0.12 + 0.4);
+                    osc.stop(now + i * 0.12 + 0.5);
                 });
             } catch {}
         }
 
-        // ── 3. Browser desktop notification ──────────────────────
-        function showNotification(count) {
+        function showNotification(title, body, url) {
             if (notifPermission !== 'granted') return;
-            if (document.hasFocus()) return; // only when window not focused
-            const n = new Notification('💬 BossGroupHub — Pesan Baru', {
-                body: `Anda memiliki ${count} pesan belum dibaca`,
+            const n = new Notification(title, {
+                body: body,
                 icon: '/favicon.ico',
-                badge: '/favicon.ico',
-                tag: 'chat-notif',   // replace old notifications
+                tag: 'admin-notif',
             });
-            n.onclick = () => { window.focus(); window.location.href = CHAT_URL; n.close(); };
-            setTimeout(() => n.close(), 5000);
+            n.onclick = () => { window.focus(); window.location.href = url; n.close(); };
+            setTimeout(() => n.close(), 8000);
         }
 
-        // ── 4. Update navbar badge ────────────────────────────────
         function updateBadge(total) {
-            const badges = [
-                document.getElementById('nav-chat-badge'),
-                document.getElementById('nav-chat-badge-mobile')
-            ];
-            
+            const badges = [document.getElementById('nav-chat-badge'), document.getElementById('nav-chat-badge-mobile')];
             badges.forEach(badge => {
                 if (!badge) return;
-                if (total > 0) {
-                    badge.textContent = total > 99 ? '99+' : total;
-                    badge.style.display = 'inline-block';
-                } else {
-                    badge.style.display = 'none';
-                }
+                badge.textContent = total > 99 ? '99+' : total;
+                badge.style.display = total > 0 ? 'inline-block' : 'none';
             });
         }
 
-        // ── 5. Update page title ──────────────────────────────────
         const baseTitle = document.title;
         function updateTitle(total) {
             document.title = total > 0 ? `(${total}) ${baseTitle}` : baseTitle;
         }
 
-        // ── 6. Main poll loop ─────────────────────────────────────
-        async function checkUnread() {
-            // Don't notify if already on chat page (polling there handles it)
-            const isOnChat = window.location.pathname.startsWith('/chat');
+        async function checkAdminNotifications() {
+            if (!IS_BACKOFFICE) return;
+            try {
+                const res = await fetch(NOTIF_URL);
+                const data = await res.json();
+                
+                if (prevAdminTotal === null) { prevAdminTotal = data.total; return; }
 
+                if (data.total > prevAdminTotal) {
+                    playBeep(true);
+                    let message = '';
+                    if (data.requests > 0) message += `${data.requests} Pengajuan Web baru. `;
+                    if (data.tickets > 0) message += `${data.tickets} Tiket Keluhan baru. `;
+                    
+                    showNotification('🔔 Tugas Baru Tersedia!', message + 'Silakan ambil tugas sekarang.', ADMIN_DASH_URL);
+                    
+                    if (window.showToast) {
+                        showToast(message, 'info');
+                    }
+                }
+                prevAdminTotal = data.total;
+            } catch {}
+        }
+
+        async function checkUnread() {
+            const isOnChat = window.location.pathname.startsWith('/chat');
             try {
                 const res    = await fetch(UNREAD_URL);
-                const counts = await res.json();   // {userId: count, ...}
-
+                const counts = await res.json();
                 const total = Object.values(counts).reduce((s, v) => s + Number(v), 0);
 
                 updateBadge(total);
                 updateTitle(total);
 
-                // On first load, store baseline — don't notify for existing unread
                 if (prevTotal === null) { prevTotal = total; return; }
 
-                // New messages arrived since last poll
                 if (total > prevTotal && !isOnChat) {
                     playBeep();
-                    showNotification(total);
+                    showNotification('💬 BossGroupHub — Pesan Baru', `Anda memiliki ${total} pesan belum dibaca`, CHAT_URL);
                 }
 
                 prevTotal = total;

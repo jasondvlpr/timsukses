@@ -62,6 +62,7 @@ Route::middleware(['auth', 'staff'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/website-requests/{websiteRequest}/reject', [AdminDashboardController::class, 'rejectWebsite'])->name('website-requests.reject');
     Route::get('/websites', [AdminDashboardController::class, 'websites'])->name('websites');
     Route::post('/websites', [AdminDashboardController::class, 'storeWebsite'])->name('websites.store');
+    Route::get('/notifications/check', [AdminDashboardController::class, 'checkNotifications'])->name('notifications.check');
 
     // Admin ONLY Routes
     Route::middleware(['admin'])->group(function () {

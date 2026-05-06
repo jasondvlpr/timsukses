@@ -304,4 +304,15 @@ class AdminDashboardController extends Controller
 
         return back()->with('success', 'Website berhasil ditambahkan secara manual.');
     }
+    public function checkNotifications()
+    {
+        $unassignedRequests = WebsiteRequest::whereNull('assigned_to_id')->where('status', 'pending')->count();
+        $unassignedTickets = Ticket::whereNull('assigned_to_id')->where('status', 'open')->count();
+
+        return response()->json([
+            'total' => $unassignedRequests + $unassignedTickets,
+            'requests' => $unassignedRequests,
+            'tickets' => $unassignedTickets,
+        ]);
+    }
 }
