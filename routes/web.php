@@ -56,6 +56,7 @@ Route::middleware(['auth', 'staff'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/tickets/{ticket}/forward', [AdminDashboardController::class, 'forwardTicket'])->name('tickets.forward');
     
     Route::get('/website-requests', [AdminDashboardController::class, 'websiteRequests'])->name('website-requests');
+    Route::post('/website-requests/{websiteRequest}/assign', [AdminDashboardController::class, 'assignWebsiteRequest'])->name('website-requests.assign');
     Route::post('/website-requests/{websiteRequest}/process', [AdminDashboardController::class, 'processWebsite'])->name('website-requests.process');
     Route::post('/website-requests/{websiteRequest}/approve', [AdminDashboardController::class, 'approveWebsite'])->name('website-requests.approve');
     Route::post('/website-requests/{websiteRequest}/reject', [AdminDashboardController::class, 'rejectWebsite'])->name('website-requests.reject');

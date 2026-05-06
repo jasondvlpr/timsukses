@@ -9,7 +9,7 @@ class WebsiteRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['ticket_number', 'user_id', 'name', 'url', 'description', 'status', 'admin_note'];
+    protected $fillable = ['ticket_number', 'user_id', 'assigned_to_id', 'name', 'url', 'description', 'status', 'admin_note'];
 
     protected static function booted()
     {
@@ -21,5 +21,10 @@ class WebsiteRequest extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function assignedTo()
+    {
+        return $this->belongsTo(User::class, 'assigned_to_id');
     }
 }

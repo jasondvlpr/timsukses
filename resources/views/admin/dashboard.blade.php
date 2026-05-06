@@ -12,15 +12,23 @@
                 <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 premium-card">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-1">Keluhan Terbuka</p>
+                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-1">Tiket Keluhan</p>
                             <h3 class="text-4xl font-extrabold text-red-600">{{ $stats['open_tickets'] }}</h3>
                         </div>
                         <div class="p-3 bg-red-50 rounded-lg">
                             <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <a href="{{ route('admin.tickets') }}" class="text-xs font-bold text-red-600 hover:underline uppercase">Tangani Sekarang &rarr;</a>
+                    <div class="mt-4 flex flex-col gap-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-500">Tugas Saya:</span>
+                            <span class="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{{ $stats['my_tickets'] }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-500">Belum Ditugaskan:</span>
+                            <span class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">{{ $stats['unassigned_tickets'] }}</span>
+                        </div>
+                        <a href="{{ route('admin.tickets', ['assigned_to' => 'none']) }}" class="mt-2 text-[10px] font-bold text-red-600 hover:underline uppercase">Ambil Tugas Baru &rarr;</a>
                     </div>
                 </div>
 
@@ -34,8 +42,16 @@
                             <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <a href="{{ route('admin.website-requests') }}" class="text-xs font-bold text-purple-600 hover:underline uppercase">Review Pengajuan &rarr;</a>
+                    <div class="mt-4 flex flex-col gap-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-500">Tugas Saya:</span>
+                            <span class="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{{ $stats['my_requests'] }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-500">Belum Ditugaskan:</span>
+                            <span class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">{{ $stats['unassigned_requests'] }}</span>
+                        </div>
+                        <a href="{{ route('admin.website-requests', ['assigned_to' => 'none']) }}" class="mt-2 text-[10px] font-bold text-purple-600 hover:underline uppercase">Proses Pengajuan &rarr;</a>
                     </div>
                 </div>
 
@@ -58,9 +74,13 @@
             <!-- Admin Welcome Area -->
             <div class="bg-indigo-900 rounded-3xl p-12 shadow-xl text-white overflow-hidden relative">
                 <div class="relative z-10">
-                    <h2 class="text-3xl font-bold mb-4">Selamat Datang di Panel Kendali, Admin!</h2>
+                    <h2 class="text-3xl font-bold mb-4">Selamat Datang, {{ auth()->user()->name }}!</h2>
                     <p class="text-indigo-200 text-lg max-w-2xl">
-                        Gunakan panel ini untuk mengelola semua laporan promotor dan menyetujui pengajuan website baru. Pastikan semua tiket segera ditanggapi untuk menjaga produktivitas tim sukses Anda.
+                        @if(auth()->user()->isAdmin())
+                            Sebagai Admin, Anda dapat memantau seluruh kinerja Staff dan menyetujui laporan akhir. Pastikan beban kerja terdistribusi dengan merata.
+                        @else
+                            Sebagai Staff, fokuslah pada tugas yang diberikan kepada Anda atau ambil tugas baru yang belum ditugaskan untuk menjaga produktivitas.
+                        @endif
                     </p>
                 </div>
                 <!-- Abstract Design Elements -->

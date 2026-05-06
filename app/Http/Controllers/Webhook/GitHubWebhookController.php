@@ -73,8 +73,8 @@ class GitHubWebhookController extends Controller
                 Log::info("GitHub Webhook Pull Output (Exit Code {$exitCode}):\n" . implode("\n", $output));
 
                 if ($exitCode === 0) {
-                    // Optional: Run additional deployment commands
-                    // exec('php artisan migrate --force');
+                    // Run additional deployment commands
+                    exec('php artisan migrate --force');
                     // exec('npm run build');
                     return response()->json(['message' => 'Deployment successful', 'output' => $output]);
                 } else {

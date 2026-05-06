@@ -15,7 +15,13 @@ class AdminDashboardController extends Controller
     {
         $stats = [
             'open_tickets' => Ticket::where('status', 'open')->count(),
-            'pending_requests' => WebsiteRequest::where('status', 'pending')->count(),
+            'my_tickets' => Ticket::where('assigned_to_id', auth()->id())->whereIn('status', ['open', 'in_progress'])->count(),
+            'unassigned_tickets' => Ticket::whereNull('assigned_to_id')->where('status', 'open')->count(),
+            
+            'pending_requests' => WebsiteRequest::whereIn('status', ['pending', 'processing'])->count(),
+            'my_requests' => WebsiteRequest::where('assigned_to_id', auth()->id())->whereIn('status', ['pending', 'processing'])->count(),
+            'unassigned_requests' => WebsiteRequest::whereNull('assigned_to_id')->where('status', 'pending')->count(),
+            
             'total_websites' => Website::count(),
             'total_promoters' => User::where('role', 'promoter')->count(),
         ];
@@ -32,10 +38,17 @@ class AdminDashboardController extends Controller
     {
         $status = $request->get('status', 'open');
         $search = $request->get('search');
+        $assignedTo = $request->get('assigned_to');
         
         $tickets = Ticket::with('user', 'website', 'assignedTo')
             ->when($status !== 'all', function($query) use ($status) {
                 return $query->where('status', $status);
+            })
+            ->when($assignedTo === 'me', function($query) {
+                return $query->where('assigned_to_id', auth()->id());
+            })
+            ->when($assignedTo === 'none', function($query) {
+                return $query->whereNull('assigned_to_id');
             })
             ->when($search, function($query) use ($search) {
                 return $query->where(function($q) use ($search) {
@@ -50,7 +63,7 @@ class AdminDashboardController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.tickets.index', compact('tickets', 'status', 'search'));
+        return view('admin.tickets.index', compact('tickets', 'status', 'search', 'assignedTo'));
     }
 
     public function showTicket(Ticket $ticket)
@@ -119,13 +132,20 @@ class AdminDashboardController extends Controller
     {
         $status = $request->get('status', 'unapproved');
         $search = $request->get('search');
+        $assignedTo = $request->get('assigned_to');
 
-        $requests = WebsiteRequest::with('user')
+        $requests = WebsiteRequest::with('user', 'assignedTo')
             ->when($status === 'unapproved', function($query) {
                 return $query->whereIn('status', ['pending', 'processing']);
             })
             ->when($status !== 'unapproved' && $status !== 'all', function($query) use ($status) {
                 return $query->where('status', $status);
+            })
+            ->when($assignedTo === 'me', function($query) {
+                return $query->where('assigned_to_id', auth()->id());
+            })
+            ->when($assignedTo === 'none', function($query) {
+                return $query->whereNull('assigned_to_id');
             })
             ->when($search, function($query) use ($search) {
                 return $query->where(function($q) use ($search) {
@@ -137,11 +157,25 @@ class AdminDashboardController extends Controller
                       });
                 });
             })
-            ->oldest()
+            ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.website_requests.index', compact('requests', 'status', 'search'));
+        $backofficeUsers = User::whereIn('role', ['admin', 'staff'])->get();
+
+        return view('admin.website_requests.index', compact('requests', 'status', 'search', 'backofficeUsers', 'assignedTo'));
+    }
+
+    public function assignWebsiteRequest(Request $request, WebsiteRequest $websiteRequest)
+    {
+        $request->validate([
+            'assigned_to_id' => 'required|exists:users,id',
+        ]);
+
+        $assignee = User::find($request->assigned_to_id);
+        $websiteRequest->update(['assigned_to_id' => $request->assigned_to_id]);
+
+        return back()->with('success', "Pengajuan berhasil ditugaskan kepada {$assignee->name}.");
     }
 
     public function processWebsite(WebsiteRequest $websiteRequest)

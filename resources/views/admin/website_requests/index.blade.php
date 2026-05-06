@@ -16,7 +16,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-slate-200">
                 <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <h3 class="text-lg font-bold text-slate-800">Daftar Pengajuan</h3>
-                    <form action="{{ route('admin.website-requests') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-4">
+                    <form action="{{ route('admin.website-requests') }}" method="GET" class="flex flex-wrap items-center gap-4">
                         <div class="relative">
                             <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari nama, url, atau promotor..." 
                                    class="px-4 py-2 text-sm border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64 transition-all" />
@@ -32,7 +32,15 @@
                                 <option value="rejected" {{ $status == 'rejected' ? 'selected' : '' }}>REJECTED</option>
                             </select>
                         </div>
-                        <button type="submit" class="hidden sm:block bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition">Cari</button>
+                        <div class="flex items-center gap-2">
+                            <label for="assigned_to" class="text-xs font-bold text-slate-500 uppercase whitespace-nowrap">Penugasan:</label>
+                            <select name="assigned_to" id="assigned_to" onchange="this.form.submit()" class="text-sm font-bold text-slate-700 border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="all" {{ $assignedTo == 'all' ? 'selected' : '' }}>SEMUA</option>
+                                <option value="me" {{ $assignedTo == 'me' ? 'selected' : '' }}>TUGAS SAYA</option>
+                                <option value="none" {{ $assignedTo == 'none' ? 'selected' : '' }}>BELUM DITUGASKAN</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition">Filter</button>
                     </form>
                 </div>
                 <div class="p-0">
@@ -43,6 +51,7 @@
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">No. Pengajuan</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Promotor</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Detail Website</th>
+                                    <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Petugas (Staff)</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Dikirim</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-4 bg-slate-50 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
@@ -73,6 +82,41 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($request->assigned_to_id)
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-[9px] font-bold">
+                                                        {{ strtoupper(substr($request->assignedTo->name, 0, 1)) }}
+                                                    </div>
+                                                    <span class="text-xs font-bold text-slate-700">{{ $request->assignedTo->name }}</span>
+                                                </div>
+                                            @else
+                                                <span class="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded italic uppercase">Belum Ditugaskan</span>
+                                            @endif
+
+                                            @if(auth()->user()->isAdmin())
+                                                <div class="mt-2">
+                                                    <form action="{{ route('admin.website-requests.assign', $request) }}" method="POST" class="flex items-center gap-1">
+                                                        @csrf
+                                                        <select name="assigned_to_id" class="text-[10px] border-slate-200 rounded p-1 w-24">
+                                                            <option value="">Pilih Staff</option>
+                                                            @foreach($backofficeUsers as $staff)
+                                                                <option value="{{ $staff->id }}" {{ $request->assigned_to_id == $staff->id ? 'selected' : '' }}>{{ $staff->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <button type="submit" class="p-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @elseif(!$request->assigned_to_id)
+                                                <form action="{{ route('admin.website-requests.assign', $request) }}" method="POST" class="mt-2">
+                                                    @csrf
+                                                    <input type="hidden" name="assigned_to_id" value="{{ auth()->id() }}">
+                                                    <button type="submit" class="text-[10px] font-bold text-white bg-indigo-600 px-2 py-1 rounded hover:bg-indigo-700 transition">Ambil Tugas</button>
+                                                </form>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-bold text-slate-700">{{ $request->created_at->format('d M Y') }}</div>
                                             <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $request->created_at->format('H:i') }} WIB</div>
                                         </td>
@@ -97,15 +141,19 @@
                                         <td class="px-6 py-4 text-right">
                                             @if($request->status == 'pending')
                                                 <div class="flex justify-end gap-2">
-                                                    <form action="{{ route('admin.website-requests.process', $request) }}" method="POST">
-                                                        @csrf
-                                                        <button type="submit" class="btn-primary px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 border-none">Proses</button>
-                                                    </form>
+                                                    @if($request->assigned_to_id == auth()->id() || auth()->user()->isAdmin())
+                                                        <form action="{{ route('admin.website-requests.process', $request) }}" method="POST">
+                                                            @csrf
+                                                            <button type="submit" class="btn-primary px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 border-none">Proses</button>
+                                                        </form>
+                                                    @endif
                                                     <button onclick="document.getElementById('reject-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('approve-form-{{ $request->id }}').classList.add('hidden');" class="btn-danger px-3 py-1 text-xs">Tolak</button>
                                                 </div>
                                             @elseif($request->status == 'processing')
                                                 <div class="flex justify-end gap-2">
-                                                    <button onclick="document.getElementById('approve-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('reject-form-{{ $request->id }}').classList.add('hidden');" class="btn-primary px-3 py-1 text-xs bg-green-600 hover:bg-green-700 border-none">Setujui & Selesaikan</button>
+                                                    @if($request->assigned_to_id == auth()->id() || auth()->user()->isAdmin())
+                                                        <button onclick="document.getElementById('approve-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('reject-form-{{ $request->id }}').classList.add('hidden');" class="btn-primary px-3 py-1 text-xs bg-green-600 hover:bg-green-700 border-none">Setujui & Selesaikan</button>
+                                                    @endif
                                                     <button onclick="document.getElementById('reject-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('approve-form-{{ $request->id }}').classList.add('hidden');" class="btn-danger px-3 py-1 text-xs">Tolak</button>
                                                 </div>
                                             @else

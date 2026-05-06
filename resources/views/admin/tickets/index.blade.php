@@ -10,7 +10,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-slate-200">
                 <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <h3 class="text-lg font-bold text-slate-800">Daftar Keluhan</h3>
-                    <form action="{{ route('admin.tickets') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-4">
+                    <form action="{{ route('admin.tickets') }}" method="GET" class="flex flex-wrap items-center gap-4">
                         <div class="relative">
                             <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari subjek, nomor, atau nama..." class="px-4 py-2 text-sm border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64 transition-all" />
                         </div>
@@ -24,7 +24,15 @@
                                 <option value="closed" {{ $status == 'closed' ? 'selected' : '' }}>CLOSED</option>
                             </select>
                         </div>
-                        <button type="submit" class="hidden sm:block bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition">Cari</button>
+                        <div class="flex items-center gap-2">
+                            <label for="assigned_to" class="text-xs font-bold text-slate-500 uppercase whitespace-nowrap">Penugasan:</label>
+                            <select name="assigned_to" id="assigned_to" onchange="this.form.submit()" class="text-sm font-bold text-slate-700 border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="all" {{ $assignedTo == 'all' ? 'selected' : '' }}>SEMUA</option>
+                                <option value="me" {{ $assignedTo == 'me' ? 'selected' : '' }}>TUGAS SAYA</option>
+                                <option value="none" {{ $assignedTo == 'none' ? 'selected' : '' }}>BELUM DITUGASKAN</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition">Filter</button>
                     </form>
                 </div>
                 <div class="p-0">
