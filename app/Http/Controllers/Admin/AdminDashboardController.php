@@ -25,7 +25,19 @@ class AdminDashboardController extends Controller
             'total_websites' => Website::count(),
             'total_promoters' => User::where('role', 'promoter')->count(),
         ];
-        return view('admin.dashboard', compact('stats'));
+
+        // Weekly data for chart
+        $days = collect(range(6, 0))->map(function($i) {
+            return now()->subDays($i)->format('Y-m-d');
+        });
+
+        $chartData = [
+            'labels' => $days->map(fn($d) => date('D', strtotime($d))),
+            'requests' => $days->map(fn($d) => WebsiteRequest::whereDate('created_at', $d)->count()),
+            'tickets' => $days->map(fn($d) => Ticket::whereDate('created_at', $d)->count()),
+        ];
+
+        return view('admin.dashboard', compact('stats', 'chartData'));
     }
 
     public function promoters()

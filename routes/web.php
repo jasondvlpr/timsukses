@@ -75,7 +75,12 @@ Route::middleware(['auth', 'staff'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/websites/{website}/transfer', [UserController::class, 'transferWebsite'])->name('websites.transfer');
         Route::delete('/websites/{website}', [AdminDashboardController::class, 'destroyWebsite'])->name('websites.destroy');
         Route::get('/promoters', [AdminDashboardController::class, 'promoters'])->name('promoters');
+
+        // Log Viewer
+        Route::get('/logs', [\App\Http\Controllers\Admin\LogViewerController::class, 'index'])->name('logs.index');
+        Route::post('/logs/clear', [\App\Http\Controllers\Admin\LogViewerController::class, 'clear'])->name('logs.clear');
     });
 });
+
 
 require __DIR__.'/auth.php';

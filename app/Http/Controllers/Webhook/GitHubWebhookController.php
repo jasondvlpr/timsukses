@@ -73,9 +73,16 @@ class GitHubWebhookController extends Controller
                 Log::info("GitHub Webhook Pull Output (Exit Code {$exitCode}):\n" . implode("\n", $output));
 
                 if ($exitCode === 0) {
+                    // Put app in maintenance mode during sensitive operations
+                    exec('php artisan down --secret="deploy-secret"');
+                    
                     // Run additional deployment commands
                     exec('php artisan migrate --force');
-                    // exec('npm run build');
+                    exec('php artisan optimize');
+                    
+                    // Bring app back up
+                    exec('php artisan up');
+                    
                     return response()->json(['message' => 'Deployment successful', 'output' => $output]);
                 } else {
                     return response()->json(['message' => 'Git pull failed', 'output' => $output], 500);

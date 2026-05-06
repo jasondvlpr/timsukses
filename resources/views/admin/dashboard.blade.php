@@ -71,22 +71,102 @@
                 </div>
             </div>
 
-            <!-- Admin Welcome Area -->
-            <div class="bg-indigo-900 rounded-3xl p-12 shadow-xl text-white overflow-hidden relative">
-                <div class="relative z-10">
-                    <h2 class="text-3xl font-bold mb-4">Selamat Datang, {{ auth()->user()->name }}!</h2>
-                    <p class="text-indigo-200 text-lg max-w-2xl">
-                        @if(auth()->user()->isAdmin())
-                            Sebagai Admin, Anda dapat memantau seluruh kinerja Staff dan menyetujui laporan akhir. Pastikan beban kerja terdistribusi dengan merata.
-                        @else
-                            Sebagai Staff, fokuslah pada tugas yang diberikan kepada Anda atau ambil tugas baru yang belum ditugaskan untuk menjaga produktivitas.
-                        @endif
-                    </p>
+            <!-- Charts and Welcome Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Welcome Area -->
+                <div class="lg:col-span-1 bg-indigo-900 rounded-3xl p-8 shadow-xl text-white overflow-hidden relative flex flex-col justify-center">
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-bold mb-4">Selamat Datang, {{ auth()->user()->name }}!</h2>
+                        <p class="text-indigo-200 text-sm leading-relaxed">
+                            @if(auth()->user()->isAdmin())
+                                Sebagai Admin, Anda dapat memantau seluruh kinerja Staff dan menyetujui laporan akhir. Pastikan beban kerja terdistribusi dengan merata.
+                            @else
+                                Sebagai Staff, fokuslah pada tugas yang diberikan kepada Anda atau ambil tugas baru yang belum ditugaskan untuk menjaga produktivitas.
+                            @endif
+                        </p>
+                        <div class="mt-6">
+                            <a href="{{ route('admin.logs.index') }}" class="inline-flex items-center gap-2 text-xs font-bold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl transition backdrop-blur-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Lihat Deployment Logs
+                            </a>
+                        </div>
+                    </div>
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-500 rounded-full opacity-20 blur-2xl"></div>
                 </div>
-                <!-- Abstract Design Elements -->
-                <div class="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-indigo-500 rounded-full opacity-20 blur-3xl"></div>
-                <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-72 h-72 bg-purple-500 rounded-full opacity-20 blur-3xl"></div>
+
+                <!-- Activity Chart -->
+                <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Aktivitas Mingguan</h3>
+                        <div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest">
+                            <div class="flex items-center gap-1.5 text-indigo-600">
+                                <div class="w-2 h-2 rounded-full bg-indigo-600"></div> Pengajuan
+                            </div>
+                            <div class="flex items-center gap-1.5 text-rose-500">
+                                <div class="w-2 h-2 rounded-full bg-rose-500"></div> Keluhan
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {!! json_encode($chartData['labels']) !!},
+                datasets: [
+                    {
+                        label: 'Pengajuan',
+                        data: {!! json_encode($chartData['requests']) !!},
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#4f46e5'
+                    },
+                    {
+                        label: 'Keluhan',
+                        data: {!! json_encode($chartData['tickets']) !!},
+                        borderColor: '#f43f5e',
+                        backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#f43f5e'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { borderDash: [5, 5], drawBorder: false },
+                        ticks: { stepSize: 1, color: '#94a3b8', font: { size: 10 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' } }
+                    }
+                }
+            }
+        });
+    </script>
+    @endpush
 </x-app-layout>
