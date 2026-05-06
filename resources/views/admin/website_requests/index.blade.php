@@ -170,7 +170,21 @@
                                                         <input type="url" name="url" value="{{ $request->url }}" class="w-full text-sm border-green-300 focus:ring-green-500 focus:border-green-500 rounded-md" required>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="block text-xs font-bold text-green-800 mb-1">Keterangan / Info Akses Web</label>
+                                                        <div class="flex justify-between items-center mb-1">
+                                                            <label class="block text-xs font-bold text-green-800">Keterangan / Info Akses Web</label>
+                                                            <div class="relative inline-block text-left" x-data="{ open: false }">
+                                                                <button type="button" @click="open = !open" class="text-[9px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                                    Quick Reply
+                                                                </button>
+                                                                <div x-show="open" @click.away="open = false" class="absolute right-0 bottom-full mb-1 w-48 rounded-lg bg-white shadow-xl border border-slate-100 py-1 z-50">
+                                                                    @foreach($quickReplies as $reply)
+                                                                        <button type="button" onclick="insertQuickReply(this, '{{ addslashes($reply->content) }}')" @click="open = false" class="w-full text-left px-3 py-1.5 text-[10px] text-slate-600 hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+                                                                            <span class="font-bold block">{{ $reply->title }}</span>
+                                                                        </button>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                         </div>
                                                         <textarea name="admin_note" class="w-full text-sm border-green-300 focus:ring-green-500 focus:border-green-500 rounded-md" placeholder="Contoh: Username: admin, Password: 123" required></textarea>
                                                     </div>
                                                     <div class="flex justify-end">
@@ -185,7 +199,21 @@
                                                 <form id="reject-form-el-{{ $request->id }}" action="{{ route('admin.website-requests.reject', $request) }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="send_whatsapp" class="wa-input" value="no">
-                                                    <label class="block text-xs font-bold text-slate-700 mb-1">Alasan Penolakan</label>
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <label class="block text-xs font-bold text-slate-700">Alasan Penolakan</label>
+                                                        <div class="relative inline-block text-left" x-data="{ open: false }">
+                                                            <button type="button" @click="open = !open" class="text-[9px] font-bold text-slate-600 bg-slate-200 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                                Quick Reply
+                                                            </button>
+                                                            <div x-show="open" @click.away="open = false" class="absolute right-0 bottom-full mb-1 w-48 rounded-lg bg-white shadow-xl border border-slate-100 py-1 z-50">
+                                                                @foreach($quickReplies as $reply)
+                                                                    <button type="button" onclick="insertQuickReply(this, '{{ addslashes($reply->content) }}')" @click="open = false" class="w-full text-left px-3 py-1.5 text-[10px] text-slate-600 hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+                                                                        <span class="font-bold block">{{ $reply->title }}</span>
+                                                                    </button>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                     </div>
                                                     <textarea name="admin_note" class="w-full text-sm border-slate-300 focus:ring-blue-500 focus:border-blue-500 rounded-md mb-3" placeholder="Alasan penolakan..." required></textarea>
                                                     <div class="flex justify-end">
                                                         <button type="button" onclick="document.getElementById('reject-form-{{ $request->id }}').classList.add('hidden')" class="mr-2 text-xs text-slate-500 font-medium">Batal</button>
@@ -268,6 +296,15 @@
                 currentForm.querySelector('.wa-input').value = value;
                 closeWAModal();
                 currentForm.submit();
+            }
+        }
+
+        function insertQuickReply(btn, content) {
+            const container = btn.closest('.mb-3') || btn.closest('form');
+            const textarea = container.querySelector('textarea');
+            if (textarea) {
+                textarea.value = content;
+                textarea.focus();
             }
         }
     </script>

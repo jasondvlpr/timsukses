@@ -7,6 +7,7 @@ use App\Models\Ticket;
 use App\Models\Website;
 use App\Models\WebsiteRequest;
 use App\Models\User;
+use App\Models\QuickReply;
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
@@ -82,7 +83,8 @@ class AdminDashboardController extends Controller
     {
         $ticket->load('messages.user', 'website', 'user', 'assignedTo');
         $backofficeUsers = User::whereIn('role', ['admin', 'staff'])->get();
-        return view('admin.tickets.show', compact('ticket', 'backofficeUsers'));
+        $quickReplies = QuickReply::latest()->get();
+        return view('admin.tickets.show', compact('ticket', 'backofficeUsers', 'quickReplies'));
     }
 
     public function replyTicket(Request $request, Ticket $ticket)
@@ -174,8 +176,9 @@ class AdminDashboardController extends Controller
             ->withQueryString();
 
         $backofficeUsers = User::whereIn('role', ['admin', 'staff'])->get();
+        $quickReplies = QuickReply::latest()->get();
 
-        return view('admin.website_requests.index', compact('requests', 'status', 'search', 'backofficeUsers', 'assignedTo'));
+        return view('admin.website_requests.index', compact('requests', 'status', 'search', 'backofficeUsers', 'assignedTo', 'quickReplies'));
     }
 
     public function assignWebsiteRequest(Request $request, WebsiteRequest $websiteRequest)

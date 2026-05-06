@@ -118,7 +118,29 @@
                         @csrf
                         <input type="hidden" name="send_whatsapp" id="send-wa-input" value="no">
                         <div class="mb-4">
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Tanggapan Admin/Staff</label>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-bold text-slate-700">Tanggapan Admin/Staff</label>
+                                <div class="relative inline-block text-left" x-data="{ open: false }">
+                                    <button type="button" @click="open = !open" class="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md hover:bg-indigo-100 transition">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                                        Balasan Cepat (Quick Reply)
+                                    </button>
+                                    <div x-show="open" @click.away="open = false" class="absolute right-0 bottom-full mb-2 w-64 rounded-xl bg-white shadow-2xl border border-slate-100 py-2 z-50 overflow-hidden">
+                                        <div class="px-4 py-2 border-b border-slate-50 mb-1">
+                                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pilih Template</span>
+                                        </div>
+                                        @foreach($quickReplies as $reply)
+                                            <button type="button" 
+                                                    onclick="insertQuickReply('{{ addslashes($reply->content) }}')"
+                                                    @click="open = false"
+                                                    class="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition flex flex-col">
+                                                <span class="font-bold">{{ $reply->title }}</span>
+                                                <span class="text-[10px] opacity-60 truncate">{{ $reply->content }}</span>
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
                             <textarea id="reply-message" name="message" rows="4" class="w-full border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Tulis balasan Anda..." required></textarea>
                         </div>
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -202,6 +224,11 @@
             waInput.value = value;
             modal.classList.add('hidden');
             form.submit();
+        }
+
+        function insertQuickReply(content) {
+            messageArea.value = content;
+            messageArea.focus();
         }
     </script>
 </x-app-layout>
