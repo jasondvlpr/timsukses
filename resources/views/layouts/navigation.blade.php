@@ -14,8 +14,8 @@
 
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center gap-2">
-                    <div class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center font-bold text-white text-sm shadow-sm">B</div>
-                    <a href="{{ route('dashboard') }}" class="hidden sm:block text-xl font-bold tracking-tight text-slate-900">
+                    <div class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center font-bold text-white text-sm shadow-sm shrink-0">B</div>
+                    <a href="{{ route('dashboard') }}" class="hidden md:block text-xl font-bold tracking-tight text-slate-900 whitespace-nowrap">
                         BossGroupHub
                     </a>
                 </div>
