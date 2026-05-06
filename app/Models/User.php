@@ -73,4 +73,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(WebsiteRequest::class);
     }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(ChatMessage::class, 'user_id');
+    }
 }

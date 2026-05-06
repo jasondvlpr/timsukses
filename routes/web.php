@@ -41,6 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/chat/unread', [ChatController::class, 'unreadCounts'])->name('chat.unread');
     Route::get('/chat/{user}', [ChatController::class, 'private'])->name('chat.private');
     Route::post('/chat/{user}/send', [ChatController::class, 'sendPrivate'])->name('chat.private.send');
+    Route::post('/chat/forward/{message}', [ChatController::class, 'forward'])->name('chat.forward');
     Route::post('/chat/{user}/typing', [ChatController::class, 'typing'])->name('chat.private.typing');
     Route::delete('/chat/{user}/clear', [ChatController::class, 'clearChat'])->name('chat.private.clear');
     Route::get('/chat/{user}/poll', [ChatController::class, 'pollPrivate'])->name('chat.private.poll');
@@ -76,6 +77,9 @@ Route::middleware(['auth', 'staff'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/websites/{website}/transfer', [UserController::class, 'transferWebsite'])->name('websites.transfer');
         Route::delete('/websites/{website}', [AdminDashboardController::class, 'destroyWebsite'])->name('websites.destroy');
         Route::get('/promoters', [AdminDashboardController::class, 'promoters'])->name('promoters');
+
+        // Analytics
+        Route::get('/analytics/chat', [\App\Http\Controllers\Admin\ChatAnalyticsController::class, 'index'])->name('analytics.chat');
 
         // Log Viewer
         Route::get('/logs', [\App\Http\Controllers\Admin\LogViewerController::class, 'index'])->name('logs.index');

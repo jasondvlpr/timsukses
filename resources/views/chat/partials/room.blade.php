@@ -1,3 +1,9 @@
+<style>
+    .forward-btn { position: absolute; right: 8px; top: 8px; opacity: 0; transition: all .2s; border: none; background: rgba(255,255,255,0.9); color: #6366f1; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; z-index: 10; }
+    .bubble-me:hover .forward-btn, .bubble-other:hover .forward-btn { opacity: 1; }
+    .bubble-other .forward-btn { left: 8px; right: auto; color: #64748b; }
+    .bubble-me, .bubble-other { position: relative !important; }
+</style>
 {{-- Header --}}
 <div class="chat-head">
     <button onclick="closeChatRoom()" class="mobile-back-btn">
@@ -96,7 +102,7 @@
         @if($msg->user_id === auth()->id())
             <div class="msg-row-me" data-msg-id="{{ $msg->id }}">
                 <div>
-                    <div class="bubble-me">
+                    <div class="bubble-me" style="position:relative">
                         @if($msg->image)
                             <img src="{{ asset('storage/' . $msg->image) }}" alt="Gambar"
                                 onclick="openLightbox(this.src)"
@@ -105,6 +111,9 @@
                         @if($msg->message)
                             <p class="bubble-text">{{ $msg->message }}</p>
                         @endif
+                        <button onclick="openForwardModal({{ $msg->id }}, '{{ addslashes($msg->message) }}')" class="forward-btn" title="Teruskan Pesan">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
                     </div>
                     <div class="bubble-time"
                         style="display:flex;align-items:center;justify-content:flex-end;gap:3px;">
@@ -139,7 +148,7 @@
                     {{ strtoupper(substr($msg->sender->name, 0, 1)) }}
                 </div>
                 <div>
-                    <div class="bubble-other">
+                    <div class="bubble-other" style="position:relative">
                         @if($msg->image)
                             <img src="{{ asset('storage/' . $msg->image) }}" alt="Gambar"
                                 onclick="openLightbox(this.src)"
@@ -148,6 +157,9 @@
                         @if($msg->message)
                             <p class="bubble-text">{{ $msg->message }}</p>
                         @endif
+                        <button onclick="openForwardModal({{ $msg->id }}, '{{ addslashes($msg->message) }}')" class="forward-btn" title="Teruskan Pesan">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
                     </div>
                     <div class="bubble-time">{{ $msg->created_at->format('H:i') }}</div>
                 </div>
@@ -236,6 +248,32 @@
     </form>
 </div>
 
+{{-- ═══ Forward Message Modal ═══ --}}
+<div id="forward-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9998;align-items:center;justify-content:center;backdrop-filter:blur(3px);" onclick="if(event.target===this) this.style.display='none'">
+    <div style="background:#fff;border-radius:20px;padding:24px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+        <div style="display:flex;justify-content:between;align-items:center;margin-bottom:20px;">
+            <h3 style="font-size:16px;font-weight:700;color:#0f172a;">Teruskan Pesan</h3>
+            <button onclick="document.getElementById('forward-modal').style.display='none'" style="border:none;background:none;cursor:pointer;color:#94a3b8;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="forward-msg-preview" style="background:#f8fafc;padding:12px;border-radius:12px;font-size:12px;color:#64748b;margin-bottom:20px;max-height:80px;overflow:hidden;border-left:4px solid #6366f1;">
+        </div>
+        <div style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+            <p style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">Pilih Admin/Staff</p>
+            @foreach($users->whereIn('role', ['admin', 'staff'])->where('id', '!=', auth()->id()) as $target)
+                <button onclick="confirmForward({{ $target->id }}, '{{ $target->name }}')" style="display:flex;align-items:center;gap:12px;width:100%;padding:10px;border-radius:12px;border:1px solid #f1f5f9;background:#fff;cursor:pointer;text-align:left;transition:all .2s;" onmouseover="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0'" onmouseout="this.style.background='#fff';this.style.borderColor='#f1f5f9'">
+                    <div style="width:32px;height:32px;border-radius:50%;background:{{ $target->isAdmin() ? '#8b5cf6' : '#3b82f6' }};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">{{ substr($target->name, 0, 1) }}</div>
+                    <div style="flex:1;">
+                        <div style="font-size:13px;font-weight:600;color:#1e293b;">{{ $target->name }}</div>
+                        <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;">{{ $target->role }}</div>
+                    </div>
+                </button>
+            @endforeach
+        </div>
+    </div>
+</div>
+
 <script>
     // Re-initialize variables because they might have been declared in global scope
     // We use a block scope or just assign to window/existing variables
@@ -267,10 +305,12 @@
         const buildMsg = m => {
             const imgHtml = m.image ? buildImg(m.image) : '';
             const txtHtml = m.message ? `<p class="bubble-text">${esc(m.message)}</p>` : '';
+            const fwdBtn = `<button onclick="openForwardModal(${m.id}, '${esc(m.message).replace(/'/g, "\\'")}')" class="forward-btn" title="Teruskan Pesan"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></button>`;
+            
             if (m.is_me) {
                 const tick = (m.is_read) ? tickRead : tickSent;
                 return `<div class="msg-row-me msg-new" data-msg-id="${m.id}"><div>
-                    <div class="bubble-me">${imgHtml}${txtHtml}</div>
+                    <div class="bubble-me" style="position:relative">${imgHtml}${txtHtml}${fwdBtn}</div>
                     <div class="bubble-time" style="display:flex;align-items:center;justify-content:flex-end;gap:3px;">
                         ${m.created_at}
                         <span class="read-tick" data-id="${m.id}">${tick}</span>
@@ -279,7 +319,7 @@
             } else {
                 return `<div class="msg-row-other msg-new" data-msg-id="${m.id}">
                     <div class="mini-avatar" style="background:${avatarGrad(m.role)}">${m.sender.charAt(0).toUpperCase()}</div>
-                    <div><div class="bubble-other">${imgHtml}${txtHtml}</div>
+                    <div><div class="bubble-other" style="position:relative">${imgHtml}${txtHtml}${fwdBtn}</div>
                     <div class="bubble-time">${m.created_at}</div></div>
                 </div>`;
             }
@@ -380,19 +420,31 @@
 
         const clearUrl = "{{ route('chat.private.clear', $user) }}";
         window.confirmClear = async () => {
-            const btn = document.getElementById('confirm-clear-btn');
-            btn.textContent = 'Menghapus...'; btn.disabled = true;
+            // ... (keep existing confirmClear code)
+        };
+
+        let activeForwardMsgId = null;
+        window.openForwardModal = (id, text) => {
+            activeForwardMsgId = id;
+            document.getElementById('forward-msg-preview').textContent = text || '[Gambar]';
+            document.getElementById('forward-modal').style.display = 'flex';
+        };
+
+        window.confirmForward = async (targetId, targetName) => {
+            if (!activeForwardMsgId) return;
+            const fwdUrl = "{{ route('chat.forward', ':id') }}".replace(':id', activeForwardMsgId);
             try {
-                const r = await fetch(clearUrl, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' } });
+                const r = await fetch(fwdUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ receiver_id: targetId })
+                });
                 const d = await r.json();
                 if (d.ok) {
-                    box.innerHTML = `<div id="empty-state" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px;color:#94a3b8;min-height:200px;"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.4"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg><div style="text-align:center;"><p style="font-size:14px;font-weight:600;">Riwayat chat dihapus</p><p style="font-size:12px;margin-top:4px;">Mulai percakapan baru di bawah</p></div></div>`;
-                    lastId = 0;
-                    document.getElementById('clear-modal').style.display = 'none';
-                    showToast('✅ Riwayat chat berhasil dihapus');
+                    document.getElementById('forward-modal').style.display = 'none';
+                    showToast('✅ Pesan diteruskan ke ' + targetName);
                 }
-            } catch { showToast('❌ Gagal menghapus, coba lagi', true); }
-            btn.textContent = '🗑️ Hapus Semua'; btn.disabled = false;
+            } catch { showToast('❌ Gagal meneruskan pesan', true); }
         };
 
         scrollDown();

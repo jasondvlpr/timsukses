@@ -107,6 +107,28 @@ class ChatController extends Controller
      * Clear (permanently delete) all messages between auth user and target user.
      * Also removes uploaded image files from storage.
      */
+    public function forward(Request $request, ChatMessage $message)
+    {
+        $request->validate([
+            'receiver_id' => 'required|exists:users,id',
+        ]);
+
+        $receiver = User::findOrFail($request->receiver_id);
+
+        if (auth()->user()->isPromoter() && $receiver->isPromoter()) {
+            abort(403);
+        }
+
+        $newMessage = ChatMessage::create([
+            'user_id'     => auth()->id(),
+            'receiver_id' => $receiver->id,
+            'message'     => "--- Diteruskan dari " . $message->sender->name . " ---\n" . $message->message,
+            'image'       => $message->image, // Copy the same image path
+        ]);
+
+        return response()->json(['ok' => true, 'message' => 'Pesan berhasil diteruskan.']);
+    }
+
     public function clearChat(User $user)
     {
         $messages = ChatMessage::privateBetween(auth()->id(), $user->id)->get();
