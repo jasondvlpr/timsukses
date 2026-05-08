@@ -94,19 +94,6 @@
                             @elseif($ticket->is_forwarded)
                                 <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase border border-green-200">Sudah Diteruskan ke Admin</span>
                             @endif
-
-                            <form action="{{ route('admin.tickets.forward', $ticket) }}" method="POST" class="flex items-center gap-2 w-full sm:w-auto border-l border-indigo-200 pl-3">
-                                @csrf
-                                <select name="assigned_to_id" class="text-xs border-indigo-200 rounded-lg focus:ring-indigo-500 w-full sm:w-48" required>
-                                    <option value="">-- Tugas Personal --</option>
-                                    @foreach($backofficeUsers as $boUser)
-                                        <option value="{{ $boUser->id }}" {{ $ticket->assigned_to_id == $boUser->id ? 'selected' : '' }}>
-                                            {{ $boUser->name }} ({{ strtoupper($boUser->role) }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm whitespace-nowrap">Tugaskan</button>
-                            </form>
                         </div>
                     </div>
                 @endif
