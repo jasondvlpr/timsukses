@@ -15,7 +15,7 @@ class StaffMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && ($request->user()->isAdmin() || $request->user()->isStaff())) {
+        if ($request->user() && ($request->user()->isAdmin() || $request->user()->isStaff() || $request->user()->isOwner())) {
             return $next($request);
         }
 

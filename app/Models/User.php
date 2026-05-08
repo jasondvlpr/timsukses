@@ -48,6 +48,11 @@ class User extends Authenticatable
         return $this->role === 'promoter';
     }
 
+    public function isOwner()
+    {
+        return $this->role === 'owner';
+    }
+
     // ─── Online Status ───────────────────────────────────────────
     /**
      * Consider user online if active within the last 5 minutes.

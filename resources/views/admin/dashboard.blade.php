@@ -12,7 +12,7 @@
                 <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 premium-card">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-1">Tiket Keluhan</p>
+                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-1">Tiket Keluhan {{ auth()->user()->isAdmin() ? '(Diteruskan)' : '' }}</p>
                             <h3 class="text-4xl font-extrabold text-red-600">{{ $stats['open_tickets'] }}</h3>
                         </div>
                         <div class="p-3 bg-red-50 rounded-lg">
@@ -24,18 +24,20 @@
                             <span class="text-slate-500">Tugas Saya:</span>
                             <span class="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{{ $stats['my_tickets'] }}</span>
                         </div>
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="text-slate-500">Belum Ditugaskan:</span>
-                            <span class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">{{ $stats['unassigned_tickets'] }}</span>
-                        </div>
-                        <a href="{{ route('admin.tickets', ['assigned_to' => 'none']) }}" class="mt-2 text-[10px] font-bold text-red-600 hover:underline uppercase">Ambil Tugas Baru &rarr;</a>
+                        @if(!auth()->user()->isOwner())
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-500">Belum Ditugaskan:</span>
+                                <span class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">{{ $stats['unassigned_tickets'] }}</span>
+                            </div>
+                            <a href="{{ route('admin.tickets', ['assigned_to' => 'none']) }}" class="mt-2 text-[10px] font-bold text-red-600 hover:underline uppercase">Ambil Tugas Baru &rarr;</a>
+                        @endif
                     </div>
                 </div>
 
                 <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 premium-card">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-1">Pengajuan Web</p>
+                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-1">Pengajuan Web {{ auth()->user()->isAdmin() ? '(Diteruskan)' : '' }}</p>
                             <h3 class="text-4xl font-extrabold text-purple-600">{{ $stats['pending_requests'] }}</h3>
                         </div>
                         <div class="p-3 bg-purple-50 rounded-lg">
@@ -47,11 +49,13 @@
                             <span class="text-slate-500">Tugas Saya:</span>
                             <span class="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{{ $stats['my_requests'] }}</span>
                         </div>
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="text-slate-500">Belum Ditugaskan:</span>
-                            <span class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">{{ $stats['unassigned_requests'] }}</span>
-                        </div>
-                        <a href="{{ route('admin.website-requests', ['assigned_to' => 'none']) }}" class="mt-2 text-[10px] font-bold text-purple-600 hover:underline uppercase">Proses Pengajuan &rarr;</a>
+                        @if(!auth()->user()->isOwner())
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-500">Belum Ditugaskan:</span>
+                                <span class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">{{ $stats['unassigned_requests'] }}</span>
+                            </div>
+                            <a href="{{ route('admin.website-requests', ['assigned_to' => 'none']) }}" class="mt-2 text-[10px] font-bold text-purple-600 hover:underline uppercase">Proses Pengajuan &rarr;</a>
+                        @endif
                     </div>
                 </div>
 
@@ -80,6 +84,8 @@
                         <p class="text-indigo-200 text-sm leading-relaxed">
                             @if(auth()->user()->isAdmin())
                                 Sebagai Admin, Anda dapat memantau seluruh kinerja Staff dan menyetujui laporan akhir. Pastikan beban kerja terdistribusi dengan merata.
+                            @elseif(auth()->user()->isOwner())
+                                Sebagai Owner, Anda dapat memantau laporan dan pengajuan website yang telah selesai ditindaklanjuti oleh Admin.
                             @else
                                 Sebagai Staff, fokuslah pada tugas yang diberikan kepada Anda atau ambil tugas baru yang belum ditugaskan untuk menjaga produktivitas.
                             @endif

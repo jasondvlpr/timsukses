@@ -14,14 +14,35 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
+        $isAdmin = auth()->user()->isAdmin();
+        $isOwner = auth()->user()->isOwner();
+
         $stats = [
-            'open_tickets' => Ticket::where('status', 'open')->count(),
-            'my_tickets' => Ticket::where('assigned_to_id', auth()->id())->whereIn('status', ['open', 'in_progress'])->count(),
-            'unassigned_tickets' => Ticket::whereNull('assigned_to_id')->where('status', 'open')->count(),
+            'open_tickets' => Ticket::when($isOwner, fn($q) => $q->whereIn('status', ['resolved', 'closed']))
+                ->when(!$isOwner, fn($q) => $q->where('status', 'open'))
+                ->when($isAdmin, fn($q) => $q->where('is_forwarded', true))
+                ->count(),
+            'my_tickets' => Ticket::where('assigned_to_id', auth()->id())
+                ->whereIn('status', ['open', 'in_progress'])
+                ->count(),
+            'unassigned_tickets' => Ticket::whereNull('assigned_to_id')
+                ->where('status', 'open')
+                ->when($isAdmin, fn($q) => $q->where('is_forwarded', true))
+                ->when($isOwner, fn($q) => $q->whereRaw('0=1'))
+                ->count(),
             
-            'pending_requests' => WebsiteRequest::whereIn('status', ['pending', 'processing'])->count(),
-            'my_requests' => WebsiteRequest::where('assigned_to_id', auth()->id())->whereIn('status', ['pending', 'processing'])->count(),
-            'unassigned_requests' => WebsiteRequest::whereNull('assigned_to_id')->where('status', 'pending')->count(),
+            'pending_requests' => WebsiteRequest::when($isOwner, fn($q) => $q->whereIn('status', ['approved', 'rejected']))
+                ->when(!$isOwner, fn($q) => $q->whereIn('status', ['pending', 'processing']))
+                ->when($isAdmin, fn($q) => $q->where('is_forwarded', true))
+                ->count(),
+            'my_requests' => WebsiteRequest::where('assigned_to_id', auth()->id())
+                ->whereIn('status', ['pending', 'processing'])
+                ->count(),
+            'unassigned_requests' => WebsiteRequest::whereNull('assigned_to_id')
+                ->where('status', 'pending')
+                ->when($isAdmin, fn($q) => $q->where('is_forwarded', true))
+                ->when($isOwner, fn($q) => $q->whereRaw('0=1'))
+                ->count(),
             
             'total_websites' => Website::count(),
             'total_promoters' => User::where('role', 'promoter')->count(),
@@ -54,6 +75,12 @@ class AdminDashboardController extends Controller
         $assignedTo = $request->get('assigned_to');
         
         $tickets = Ticket::with('user', 'website', 'assignedTo')
+            ->when(auth()->user()->isAdmin(), function($query) {
+                return $query->where('is_forwarded', true);
+            })
+            ->when(auth()->user()->isOwner(), function($query) {
+                return $query->whereIn('status', ['resolved', 'closed']);
+            })
             ->when($status !== 'all', function($query) use ($status) {
                 return $query->where('status', $status);
             })
@@ -118,6 +145,24 @@ class AdminDashboardController extends Controller
         return back()->with('success', 'Balasan berhasil dikirim' . ($request->send_whatsapp === 'yes' ? ' dan dikirim ke WhatsApp.' : '.'));
     }
 
+    public function forwardTicketToAdmin(Ticket $ticket)
+    {
+        if (!auth()->user()->isStaff()) {
+            return back()->with('error', 'Hanya Staff yang dapat meneruskan tiket ke Admin.');
+        }
+
+        $ticket->update(['is_forwarded' => true]);
+
+        // Optional: Add internal message
+        $ticket->messages()->create([
+            'user_id' => auth()->id(),
+            'message' => "--- Tiket ini telah diteruskan ke Admin oleh Staff ---",
+            'is_admin_reply' => true,
+        ]);
+
+        return back()->with('success', 'Tiket berhasil diteruskan ke Admin.');
+    }
+
     public function forwardTicket(Request $request, Ticket $ticket)
     {
         $request->validate([
@@ -149,6 +194,12 @@ class AdminDashboardController extends Controller
         $assignedTo = $request->get('assigned_to');
 
         $requests = WebsiteRequest::with('user', 'assignedTo')
+            ->when(auth()->user()->isAdmin(), function($query) {
+                return $query->where('is_forwarded', true);
+            })
+            ->when(auth()->user()->isOwner(), function($query) {
+                return $query->whereIn('status', ['approved', 'rejected']);
+            })
             ->when($status === 'unapproved', function($query) {
                 return $query->whereIn('status', ['pending', 'processing']);
             })
@@ -179,6 +230,17 @@ class AdminDashboardController extends Controller
         $quickReplies = QuickReply::latest()->get();
 
         return view('admin.website_requests.index', compact('requests', 'status', 'search', 'backofficeUsers', 'assignedTo', 'quickReplies'));
+    }
+
+    public function forwardWebsiteRequestToAdmin(WebsiteRequest $websiteRequest)
+    {
+        if (!auth()->user()->isStaff()) {
+            return back()->with('error', 'Hanya Staff yang dapat meneruskan pengajuan ke Admin.');
+        }
+
+        $websiteRequest->update(['is_forwarded' => true]);
+
+        return back()->with('success', 'Pengajuan berhasil diteruskan ke Admin.');
     }
 
     public function assignWebsiteRequest(Request $request, WebsiteRequest $websiteRequest)
@@ -309,8 +371,16 @@ class AdminDashboardController extends Controller
     }
     public function checkNotifications()
     {
-        $unassignedRequests = WebsiteRequest::whereNull('assigned_to_id')->where('status', 'pending')->count();
-        $unassignedTickets = Ticket::whereNull('assigned_to_id')->where('status', 'open')->count();
+        $isAdmin = auth()->user()->isAdmin();
+
+        $unassignedRequests = WebsiteRequest::whereNull('assigned_to_id')
+            ->where('status', 'pending')
+            ->when($isAdmin, fn($q) => $q->where('is_forwarded', true))
+            ->count();
+        $unassignedTickets = Ticket::whereNull('assigned_to_id')
+            ->where('status', 'open')
+            ->when($isAdmin, fn($q) => $q->where('is_forwarded', true))
+            ->count();
 
         return response()->json([
             'total' => $unassignedRequests + $unassignedTickets,

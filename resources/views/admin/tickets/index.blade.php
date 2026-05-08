@@ -96,6 +96,11 @@
                                                     {{ strtoupper($ticket->status) }}
                                                 @endif
                                             </span>
+                                            @if($ticket->is_forwarded)
+                                                <div class="mt-1">
+                                                    <span class="text-[9px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100 uppercase tracking-tighter">Diteruskan ke Admin</span>
+                                                </div>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 text-right">
                                             <a href="{{ route('admin.tickets.show', $ticket) }}" class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-900 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg transition">

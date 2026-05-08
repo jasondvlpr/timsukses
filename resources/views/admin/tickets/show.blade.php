@@ -75,25 +75,41 @@
                     @endif
                 </div>
 
-                <!-- Forward Ticket Section (Staff & Admin) -->
-                <div class="px-8 py-4 bg-indigo-50 border-b border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        <span class="text-sm font-bold text-indigo-900">Teruskan Keluhan Ini</span>
+                @if(!auth()->user()->isOwner())
+                    <!-- Forward Ticket Section (Staff & Admin) -->
+                    <div class="px-8 py-4 bg-indigo-50 border-b border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            <span class="text-sm font-bold text-indigo-900">Teruskan Keluhan Ini</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                            @if(auth()->user()->isStaff() && !$ticket->is_forwarded)
+                                <form action="{{ route('admin.tickets.forward-to-admin', $ticket) }}" method="POST" class="mr-2">
+                                    @csrf
+                                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 transition shadow-sm whitespace-nowrap flex items-center gap-2">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                        Teruskan ke Admin
+                                    </button>
+                                </form>
+                            @elseif($ticket->is_forwarded)
+                                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase border border-green-200">Sudah Diteruskan ke Admin</span>
+                            @endif
+
+                            <form action="{{ route('admin.tickets.forward', $ticket) }}" method="POST" class="flex items-center gap-2 w-full sm:w-auto border-l border-indigo-200 pl-3">
+                                @csrf
+                                <select name="assigned_to_id" class="text-xs border-indigo-200 rounded-lg focus:ring-indigo-500 w-full sm:w-48" required>
+                                    <option value="">-- Tugas Personal --</option>
+                                    @foreach($backofficeUsers as $boUser)
+                                        <option value="{{ $boUser->id }}" {{ $ticket->assigned_to_id == $boUser->id ? 'selected' : '' }}>
+                                            {{ $boUser->name }} ({{ strtoupper($boUser->role) }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm whitespace-nowrap">Tugaskan</button>
+                            </form>
+                        </div>
                     </div>
-                    <form action="{{ route('admin.tickets.forward', $ticket) }}" method="POST" class="flex items-center gap-2 w-full sm:w-auto">
-                        @csrf
-                        <select name="assigned_to_id" class="text-xs border-indigo-200 rounded-lg focus:ring-indigo-500 w-full sm:w-48" required>
-                            <option value="">-- Pilih Admin/Staff --</option>
-                            @foreach($backofficeUsers as $boUser)
-                                <option value="{{ $boUser->id }}" {{ $ticket->assigned_to_id == $boUser->id ? 'selected' : '' }}>
-                                    {{ $boUser->name }} ({{ strtoupper($boUser->role) }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm whitespace-nowrap">Teruskan</button>
-                    </form>
-                </div>
+                @endif
 
                 <!-- Messages Thread -->
                 <div class="p-8 space-y-6 min-h-[150px]">
@@ -112,51 +128,53 @@
                     @endforeach
                 </div>
 
-                <!-- Reply Form -->
-                <div class="p-8 bg-slate-50 border-t border-slate-200">
-                    <form id="reply-form" action="{{ route('admin.tickets.reply', $ticket) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="send_whatsapp" id="send-wa-input" value="no">
-                        <div class="mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="block text-sm font-bold text-slate-700">Tanggapan Admin/Staff</label>
-                                <div class="relative inline-block text-left" x-data="{ open: false }">
-                                    <button type="button" @click="open = !open" class="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md hover:bg-indigo-100 transition">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-                                        Balasan Cepat (Quick Reply)
-                                    </button>
-                                    <div x-show="open" @click.away="open = false" class="absolute right-0 bottom-full mb-2 w-64 rounded-xl bg-white shadow-2xl border border-slate-100 py-2 z-50 overflow-hidden">
-                                        <div class="px-4 py-2 border-b border-slate-50 mb-1">
-                                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pilih Template</span>
+                @if(!auth()->user()->isOwner())
+                    <!-- Reply Form -->
+                    <div class="p-8 bg-slate-50 border-t border-slate-200">
+                        <form id="reply-form" action="{{ route('admin.tickets.reply', $ticket) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="send_whatsapp" id="send-wa-input" value="no">
+                            <div class="mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-sm font-bold text-slate-700">Tanggapan Admin/Staff</label>
+                                    <div class="relative inline-block text-left" x-data="{ open: false }">
+                                        <button type="button" @click="open = !open" class="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md hover:bg-indigo-100 transition">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                                            Balasan Cepat (Quick Reply)
+                                        </button>
+                                        <div x-show="open" @click.away="open = false" class="absolute right-0 bottom-full mb-2 w-64 rounded-xl bg-white shadow-2xl border border-slate-100 py-2 z-50 overflow-hidden">
+                                            <div class="px-4 py-2 border-b border-slate-50 mb-1">
+                                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pilih Template</span>
+                                            </div>
+                                            @foreach($quickReplies as $reply)
+                                                <button type="button" 
+                                                        onclick="insertQuickReply('{{ addslashes($reply->content) }}')"
+                                                        @click="open = false"
+                                                        class="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition flex flex-col">
+                                                    <span class="font-bold">{{ $reply->title }}</span>
+                                                    <span class="text-[10px] opacity-60 truncate">{{ $reply->content }}</span>
+                                                </button>
+                                            @endforeach
                                         </div>
-                                        @foreach($quickReplies as $reply)
-                                            <button type="button" 
-                                                    onclick="insertQuickReply('{{ addslashes($reply->content) }}')"
-                                                    @click="open = false"
-                                                    class="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition flex flex-col">
-                                                <span class="font-bold">{{ $reply->title }}</span>
-                                                <span class="text-[10px] opacity-60 truncate">{{ $reply->content }}</span>
-                                            </button>
-                                        @endforeach
                                     </div>
                                 </div>
+                                <textarea id="reply-message" name="message" rows="4" class="w-full border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Tulis balasan Anda..." required></textarea>
                             </div>
-                            <textarea id="reply-message" name="message" rows="4" class="w-full border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Tulis balasan Anda..." required></textarea>
-                        </div>
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div class="flex items-center gap-4">
-                                <label class="text-sm font-bold text-slate-700 whitespace-nowrap">Status Tiket:</label>
-                                <select name="status" class="text-sm border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="open" {{ $ticket->status == 'open' ? 'selected' : '' }}>Open</option>
-                                    <option value="in_progress" {{ $ticket->status == 'in_progress' ? 'selected' : '' }}>Sedang Diproses</option>
-                                    <option value="resolved" {{ $ticket->status == 'resolved' ? 'selected' : '' }}>Resolved</option>
-                                    <option value="closed" {{ $ticket->status == 'closed' ? 'selected' : '' }}>Closed</option>
-                                </select>
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div class="flex items-center gap-4">
+                                    <label class="text-sm font-bold text-slate-700 whitespace-nowrap">Status Tiket:</label>
+                                    <select name="status" class="text-sm border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="open" {{ $ticket->status == 'open' ? 'selected' : '' }}>Open</option>
+                                        <option value="in_progress" {{ $ticket->status == 'in_progress' ? 'selected' : '' }}>Sedang Diproses</option>
+                                        <option value="resolved" {{ $ticket->status == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                                        <option value="closed" {{ $ticket->status == 'closed' ? 'selected' : '' }}>Closed</option>
+                                    </select>
+                                </div>
+                                <button type="button" onclick="handleReplySubmit()" class="btn-primary px-8 py-2 rounded-xl font-bold shadow-lg w-full sm:w-auto">Kirim Balasan</button>
                             </div>
-                            <button type="button" onclick="handleReplySubmit()" class="btn-primary px-8 py-2 rounded-xl font-bold shadow-lg w-full sm:w-auto">Kirim Balasan</button>
-                        </div>
-                    </form>
-                </div>
+                        </form>
+                    </div>
+                @endif
             </div>
             
             <div class="mt-6 flex justify-center">

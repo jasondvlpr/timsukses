@@ -9,7 +9,7 @@ class WebsiteRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['ticket_number', 'user_id', 'assigned_to_id', 'name', 'url', 'description', 'status', 'admin_note'];
+    protected $fillable = ['ticket_number', 'user_id', 'assigned_to_id', 'name', 'url', 'description', 'status', 'admin_note', 'is_forwarded'];
 
     protected static function booted()
     {

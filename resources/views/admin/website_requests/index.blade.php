@@ -138,27 +138,41 @@
                                                 </div>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 text-right">
-                                            @if($request->status == 'pending')
-                                                <div class="flex justify-end gap-2">
-                                                    @if($request->assigned_to_id == auth()->id() || auth()->user()->isAdmin())
-                                                        <form action="{{ route('admin.website-requests.process', $request) }}" method="POST">
+                                         <td class="px-6 py-4 text-right">
+                                            <div class="flex justify-end items-center gap-2">
+                                                @if(!auth()->user()->isOwner())
+                                                    @if(auth()->user()->isStaff() && !$request->is_forwarded)
+                                                        <form action="{{ route('admin.website-requests.forward-to-admin', $request) }}" method="POST">
                                                             @csrf
-                                                            <button type="submit" class="btn-primary px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 border-none">Proses</button>
+                                                            <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded text-[10px] font-bold hover:bg-red-700 transition flex items-center gap-1 shadow-sm">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                                                Teruskan ke Admin
+                                                            </button>
                                                         </form>
+                                                    @elseif($request->is_forwarded)
+                                                        <span class="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100 uppercase tracking-tighter">Sudah di Admin</span>
                                                     @endif
-                                                    <button onclick="document.getElementById('reject-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('approve-form-{{ $request->id }}').classList.add('hidden');" class="btn-danger px-3 py-1 text-xs">Tolak</button>
-                                                </div>
-                                            @elseif($request->status == 'processing')
-                                                <div class="flex justify-end gap-2">
-                                                    @if($request->assigned_to_id == auth()->id() || auth()->user()->isAdmin())
-                                                        <button onclick="document.getElementById('approve-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('reject-form-{{ $request->id }}').classList.add('hidden');" class="btn-primary px-3 py-1 text-xs bg-green-600 hover:bg-green-700 border-none">Setujui & Selesaikan</button>
+
+                                                    @if($request->status == 'pending')
+                                                        @if($request->assigned_to_id == auth()->id() || auth()->user()->isAdmin())
+                                                            <form action="{{ route('admin.website-requests.process', $request) }}" method="POST">
+                                                                @csrf
+                                                                <button type="submit" class="btn-primary px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 border-none">Proses</button>
+                                                            </form>
+                                                        @endif
+                                                        <button onclick="document.getElementById('reject-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('approve-form-{{ $request->id }}').classList.add('hidden');" class="btn-danger px-3 py-1 text-xs">Tolak</button>
+                                                    @elseif($request->status == 'processing')
+                                                        @if($request->assigned_to_id == auth()->id() || auth()->user()->isAdmin())
+                                                            <button onclick="document.getElementById('approve-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('reject-form-{{ $request->id }}').classList.add('hidden');" class="btn-primary px-3 py-1 text-xs bg-green-600 hover:bg-green-700 border-none">Setujui & Selesaikan</button>
+                                                        @endif
+                                                        <button onclick="document.getElementById('reject-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('approve-form-{{ $request->id }}').classList.add('hidden');" class="btn-danger px-3 py-1 text-xs">Tolak</button>
+                                                    @else
+                                                        <span class="text-slate-400 text-xs font-medium bg-slate-100 px-3 py-1 rounded-full">Selesai</span>
                                                     @endif
-                                                    <button onclick="document.getElementById('reject-form-{{ $request->id }}').classList.toggle('hidden'); document.getElementById('approve-form-{{ $request->id }}').classList.add('hidden');" class="btn-danger px-3 py-1 text-xs">Tolak</button>
-                                                </div>
-                                            @else
-                                                <span class="text-slate-400 text-xs font-medium bg-slate-100 px-3 py-1 rounded-full">Selesai</span>
-                                            @endif
+                                                @else
+                                                    <span class="text-slate-400 text-xs font-medium bg-slate-100 px-3 py-1 rounded-full">Selesai</span>
+                                                @endif
+                                            </div>
                                             
                                             <!-- Approve Form -->
                                             <div id="approve-form-{{ $request->id }}" class="hidden mt-4 text-left p-4 bg-green-50 rounded-lg border border-green-200">

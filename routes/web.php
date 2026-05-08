@@ -17,7 +17,7 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    if (auth()->user()->isAdmin() || auth()->user()->isStaff()) {
+    if (auth()->user()->isAdmin() || auth()->user()->isStaff() || auth()->user()->isOwner()) {
         return redirect()->route('admin.dashboard');
     }
     return app(PromoterDashboardController::class)->index();
@@ -55,9 +55,11 @@ Route::middleware(['auth', 'staff'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/tickets/{ticket}', [AdminDashboardController::class, 'showTicket'])->name('tickets.show');
     Route::post('/tickets/{ticket}/reply', [AdminDashboardController::class, 'replyTicket'])->name('tickets.reply');
     Route::post('/tickets/{ticket}/forward', [AdminDashboardController::class, 'forwardTicket'])->name('tickets.forward');
+    Route::post('/tickets/{ticket}/forward-to-admin', [AdminDashboardController::class, 'forwardTicketToAdmin'])->name('tickets.forward-to-admin');
     
     Route::get('/website-requests', [AdminDashboardController::class, 'websiteRequests'])->name('website-requests');
     Route::post('/website-requests/{websiteRequest}/assign', [AdminDashboardController::class, 'assignWebsiteRequest'])->name('website-requests.assign');
+    Route::post('/website-requests/{websiteRequest}/forward-to-admin', [AdminDashboardController::class, 'forwardWebsiteRequestToAdmin'])->name('website-requests.forward-to-admin');
     Route::post('/website-requests/{websiteRequest}/process', [AdminDashboardController::class, 'processWebsite'])->name('website-requests.process');
     Route::post('/website-requests/{websiteRequest}/approve', [AdminDashboardController::class, 'approveWebsite'])->name('website-requests.approve');
     Route::post('/website-requests/{websiteRequest}/reject', [AdminDashboardController::class, 'rejectWebsite'])->name('website-requests.reject');
