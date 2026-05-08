@@ -24,6 +24,26 @@
             @endif
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-slate-200">
+                <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <h3 class="text-lg font-bold text-slate-800">Daftar Akun</h3>
+                    <form action="{{ route('admin.users.index') }}" method="GET" class="flex flex-wrap items-center gap-4">
+                        <div class="relative">
+                            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari nama, username, wa..." 
+                                   class="px-4 py-2 text-sm border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64 transition-all" />
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label for="role" class="text-xs font-bold text-slate-500 uppercase whitespace-nowrap">Role:</label>
+                            <select name="role" id="role" onchange="this.form.submit()" class="text-sm font-bold text-slate-700 border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="all" {{ ($role ?? 'all') == 'all' ? 'selected' : '' }}>SEMUA ROLE</option>
+                                <option value="admin" {{ ($role ?? '') == 'admin' ? 'selected' : '' }}>ADMIN</option>
+                                <option value="staff" {{ ($role ?? '') == 'staff' ? 'selected' : '' }}>STAFF</option>
+                                <option value="promoter" {{ ($role ?? '') == 'promoter' ? 'selected' : '' }}>PROMOTER</option>
+                                <option value="owner" {{ ($role ?? '') == 'owner' ? 'selected' : '' }}>OWNER</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition">Cari</button>
+                    </form>
+                </div>
                 <div class="p-0">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-slate-200">
@@ -37,10 +57,11 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 bg-white">
-                                @foreach($users as $user)
+                                @forelse($users as $user)
                                     <tr class="hover:bg-slate-50 transition">
                                         <td class="px-6 py-4">
                                             <div class="text-sm font-bold text-slate-900">{{ $user->name }}</div>
+                                            <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $user->username }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @if($user->whatsapp)
@@ -56,6 +77,7 @@
                                             <span class="px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-widest
                                                 @if($user->isAdmin()) bg-purple-100 text-purple-700
                                                 @elseif($user->isStaff()) bg-blue-100 text-blue-700
+                                                @elseif($user->isOwner()) bg-green-100 text-green-700
                                                 @else bg-slate-100 text-slate-600 @endif">
                                                 {{ $user->role }}
                                             </span>
@@ -77,7 +99,11 @@
                                             </div>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-8 text-center text-slate-500 font-medium">Tidak ada akun ditemukan.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

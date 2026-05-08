@@ -12,10 +12,27 @@ use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::withCount('websites')->latest()->paginate(10);
-        return view('admin.users.index', compact('users'));
+        $search = $request->get('search');
+        $role = $request->get('role');
+
+        $users = User::withCount('websites')
+            ->when($role && $role !== 'all', function($query) use ($role) {
+                return $query->where('role', $role);
+            })
+            ->when($search, function($query) use ($search) {
+                return $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('username', 'like', "%{$search}%")
+                      ->orWhere('whatsapp', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.users.index', compact('users', 'search', 'role'));
     }
 
     public function create()
