@@ -24,14 +24,7 @@
                                 <option value="closed" {{ $status == 'closed' ? 'selected' : '' }}>CLOSED</option>
                             </select>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <label for="assigned_to" class="text-xs font-bold text-slate-500 uppercase whitespace-nowrap">Penugasan:</label>
-                            <select name="assigned_to" id="assigned_to" onchange="this.form.submit()" class="text-sm font-bold text-slate-700 border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="all" {{ $assignedTo == 'all' ? 'selected' : '' }}>SEMUA</option>
-                                <option value="me" {{ $assignedTo == 'me' ? 'selected' : '' }}>TUGAS SAYA</option>
-                                <option value="none" {{ $assignedTo == 'none' ? 'selected' : '' }}>BELUM DITUGASKAN</option>
-                            </select>
-                        </div>
+
                         <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition">Filter</button>
                     </form>
                 </div>
@@ -44,7 +37,6 @@
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Promotor</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Subjek</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Dikirim</th>
-                                    <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Assignee</th>
                                     <th class="px-6 py-4 bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-4 bg-slate-50 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
@@ -74,16 +66,7 @@
                                             <div class="text-sm font-bold text-slate-700">{{ $ticket->created_at->format('d M Y') }}</div>
                                             <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $ticket->created_at->format('H:i') }} WIB</div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($ticket->assignedTo)
-                                                <div class="flex items-center gap-1">
-                                                    <div class="w-5 h-5 bg-indigo-100 rounded-full flex items-center justify-center text-[10px] font-bold text-indigo-700">{{ substr($ticket->assignedTo->name, 0, 1) }}</div>
-                                                    <span class="text-xs font-bold text-slate-700">{{ $ticket->assignedTo->name }}</span>
-                                                </div>
-                                            @else
-                                                <span class="text-[10px] font-bold text-slate-300 italic uppercase">Belum Assign</span>
-                                            @endif
-                                        </td>
+
                                         <td class="px-6 py-4">
                                             <span class="px-3 py-1 text-xs font-bold rounded-full 
                                                 @if($ticket->status == 'open') bg-yellow-100 text-yellow-700
@@ -111,7 +94,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-6 py-8 text-center text-slate-500 font-medium">Belum ada keluhan masuk.</td>
+                                        <td colspan="6" class="px-6 py-8 text-center text-slate-500 font-medium">Belum ada keluhan masuk.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
