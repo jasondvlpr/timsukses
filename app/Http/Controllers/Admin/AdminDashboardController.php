@@ -222,7 +222,7 @@ class AdminDashboardController extends Controller
                       });
                 });
             })
-            ->latest()
+            ->oldest()
             ->paginate(10)
             ->withQueryString();
 
